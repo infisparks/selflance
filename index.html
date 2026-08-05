@@ -28,6 +28,12 @@
         }
     </script>
     <style>
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            position: relative;
+        }
         html { scroll-behavior: smooth; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -48,7 +54,7 @@
         .ticker-track:hover { animation-play-state: paused; }
     </style>
 </head>
-<body class="font-sans text-white bg-[#0B1121] antialiased selection:bg-brand-orange selection:text-white relative">
+<body class="font-sans text-white bg-[#0B1121] antialiased selection:bg-brand-orange selection:text-white relative overflow-x-hidden w-full max-w-full">
 
     <!-- FIXED HEADER -->
     <div class="fixed top-0 inset-x-0 z-50 flex justify-center">
@@ -67,7 +73,7 @@
     </div>
 
     <!-- MAIN HERO -->
-    <main class="w-full max-w-5xl mx-auto min-h-screen pt-[58px] sm:pt-[80px] pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3">
+    <main class="w-full max-w-5xl mx-auto min-h-screen pt-[58px] sm:pt-[80px] pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3 overflow-hidden">
 
         <!-- Ambient glows -->
         <div class="absolute top-[20%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] bg-blue-900/20 blur-[90px] rounded-full pointer-events-none -z-10"></div>
@@ -312,7 +318,7 @@
     <!-- ══════════════════════════════════════
          SECTION 2: THE GROWTH BOTTLENECK
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         
         <!-- Background ambient glow -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[600px] h-[320px] sm:h-[600px] bg-red-600/15 blur-[120px] rounded-full pointer-events-none -z-10"></div>
@@ -397,7 +403,7 @@
     <!-- ══════════════════════════════════════
          SECTION 3: TECHNOLOGY GROWTH PARTNER
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         
         <!-- Ambient Background Glow -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-purple-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
@@ -494,7 +500,7 @@
     <!-- ══════════════════════════════════════
          SECTION 4: WHAT WE BUILD
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         
         <!-- Background Glow -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-blue-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
@@ -758,7 +764,7 @@
     <!-- ══════════════════════════════════════
          SECTION 6: WHO THIS CONSULTATION IS FOR
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-purple-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
         <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -814,7 +820,7 @@
     <!-- ══════════════════════════════════════
          SECTION 7: STRATEGY SESSION DELIVERABLES
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-blue-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
         <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -887,7 +893,7 @@
     <!-- ══════════════════════════════════════
          SECTION 8: WHY BUSINESSES CHOOSE SELFLANCE
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-indigo-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
         <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -941,7 +947,7 @@
     <!-- ══════════════════════════════════════
          SECTION 9: OUR DEVELOPMENT PROCESS
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-purple-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
         <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -993,7 +999,7 @@
     <!-- ══════════════════════════════════════
          SECTION 10: BEFORE YOU BOOK (SELECTIVITY)
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-red-900/15 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
         <div class="bg-[#0F1629]/90 border border-brand-orange/40 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -1030,7 +1036,7 @@
     <!-- ══════════════════════════════════════
          FINAL CTA BANNER
     ══════════════════════════════════════ -->
-    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 text-center">
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 text-center overflow-hidden">
         <div class="bg-gradient-to-br from-[#121A2F] via-[#0F1629] to-[#1E1B4B] border border-[#6366F1]/50 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-[0_15px_50px_rgba(99,102,241,0.3)] relative overflow-hidden">
             
             <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 max-w-3xl mx-auto">
@@ -1058,7 +1064,7 @@
     <!-- ══════════════════════════════════════
          FOOTER & BRAND POSITIONING STATEMENT
     ══════════════════════════════════════ -->
-    <footer class="w-full border-t border-gray-800/80 bg-[#070B16] py-10 px-4 sm:px-6 relative z-10 text-center sm:text-left">
+    <footer class="w-full border-t border-gray-800/80 bg-[#070B16] py-10 px-4 sm:px-6 relative z-10 text-center sm:text-left overflow-hidden">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
                 <div class="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-1">
