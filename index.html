@@ -292,11 +292,46 @@
     </main>
 
     <script>
-        // Seamless ticker: duplicate items for infinite loop
+        // ── Ticker: duplicate items for infinite loop ──
         (function () {
             var track = document.getElementById('ticker-track');
+            if (!track) return;
             var items = Array.from(track.children);
             items.forEach(function(el) { track.appendChild(el.cloneNode(true)); });
+        })();
+
+        // ── Testimonial auto-rotate carousel ──
+        (function () {
+            var track  = document.getElementById('testi-track');
+            var dots   = document.querySelectorAll('.testi-dot');
+            if (!track) return;
+            var total  = track.children.length;
+            var cur    = 0;
+
+            function goTo(idx) {
+                cur = (idx + total) % total;
+                track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+                dots.forEach(function(d, i) {
+                    if (i === cur) {
+                        d.style.width = '16px';
+                        d.style.background = '#6366F1';
+                    } else {
+                        d.style.width = '6px';
+                        d.style.background = '#4B5563';
+                    }
+                });
+            }
+
+            // Auto-advance every 3.5 s
+            setInterval(function() { goTo(cur + 1); }, 3500);
+
+            // Dot click
+            dots.forEach(function(d, i) {
+                d.style.cursor = 'pointer';
+                d.addEventListener('click', function() { goTo(i); });
+            });
+
+            goTo(0);
         })();
     </script>
 </body>
