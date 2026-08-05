@@ -315,65 +315,79 @@
     <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
         
         <!-- Background ambient glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-red-900/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[600px] h-[320px] sm:h-[600px] bg-red-600/15 blur-[120px] rounded-full pointer-events-none -z-10"></div>
 
-        <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+        <div class="bg-gradient-to-b from-[#141A2D] via-[#0F1629] to-[#0A0E1A] border border-[#2A3552] rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-hidden">
             
             <!-- Top badge -->
             <div class="flex justify-center sm:justify-start mb-4">
-                <div class="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1 text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <div class="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-full px-3.5 py-1 text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
                     The Real Bottleneck
                 </div>
             </div>
 
             <!-- Heading -->
-            <h2 class="text-xl sm:text-3xl md:text-4xl font-extrabold text-white text-center sm:text-left leading-snug sm:leading-tight mb-4">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white text-center sm:text-left leading-snug sm:leading-tight mb-3">
                 Aaj Ka Biggest Business Problem Website Ya App Nahi Hai... 
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400">It's Growth.</span>
+                <br class="hidden sm:block">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-amber-400 drop-shadow">It's Growth.</span>
             </h2>
 
             <!-- Intro text -->
-            <p class="text-gray-300 text-xs sm:text-base leading-relaxed text-center sm:text-left mb-6 max-w-3xl">
-                Bahut si companies lakhon rupaye marketing mein invest karti hain. Leads bhi aate hain. Team bhi badi hoti hai. <span class="text-white font-semibold underline decoration-red-500/50">Lekin...</span>
+            <p class="text-gray-300 text-xs sm:text-base leading-relaxed text-center sm:text-left mb-7 max-w-3xl font-medium">
+                Bahut si companies lakhon rupaye marketing mein invest karti hain. Leads bhi aate hain. Team bhi badi hoti hai. <span class="text-red-400 font-bold underline decoration-red-500/50">Lekin...</span>
             </p>
 
             <!-- Problem points list -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
-                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
-                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Operations manual hain.</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 mb-7 sm:mb-9">
+                <div class="group flex items-center gap-3.5 bg-gradient-to-r from-[#1A1224] to-[#111827] border border-red-500/20 hover:border-red-500/70 rounded-2xl p-4 transition-all duration-300 shadow-md hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <div class="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 font-extrabold text-sm shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.3)] group-hover:scale-110 transition-transform">
+                        ✕
+                    </div>
+                    <span class="text-white text-xs sm:text-sm font-semibold tracking-wide">Operations manual hain.</span>
                 </div>
 
-                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
-                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
-                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Multiple software use ho rahe hain.</span>
+                <div class="group flex items-center gap-3.5 bg-gradient-to-r from-[#1A1224] to-[#111827] border border-red-500/20 hover:border-red-500/70 rounded-2xl p-4 transition-all duration-300 shadow-md hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <div class="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 font-extrabold text-sm shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.3)] group-hover:scale-110 transition-transform">
+                        ✕
+                    </div>
+                    <span class="text-white text-xs sm:text-sm font-semibold tracking-wide">Multiple software use ho rahe hain.</span>
                 </div>
 
-                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
-                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
-                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Website sirf brochure banke reh gayi hai.</span>
+                <div class="group flex items-center gap-3.5 bg-gradient-to-r from-[#1A1224] to-[#111827] border border-red-500/20 hover:border-red-500/70 rounded-2xl p-4 transition-all duration-300 shadow-md hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <div class="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 font-extrabold text-sm shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.3)] group-hover:scale-110 transition-transform">
+                        ✕
+                    </div>
+                    <span class="text-white text-xs sm:text-sm font-semibold tracking-wide">Website sirf brochure banke reh gayi hai.</span>
                 </div>
 
-                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
-                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
-                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Mobile app customers use hi nahi karte.</span>
+                <div class="group flex items-center gap-3.5 bg-gradient-to-r from-[#1A1224] to-[#111827] border border-red-500/20 hover:border-red-500/70 rounded-2xl p-4 transition-all duration-300 shadow-md hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <div class="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 font-extrabold text-sm shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.3)] group-hover:scale-110 transition-transform">
+                        ✕
+                    </div>
+                    <span class="text-white text-xs sm:text-sm font-semibold tracking-wide">Mobile app customers use hi nahi karte.</span>
                 </div>
 
-                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors md:col-span-2">
-                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
-                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Teams Excel aur WhatsApp pe business chala rahi hain.</span>
+                <div class="group flex items-center gap-3.5 bg-gradient-to-r from-[#1A1224] to-[#111827] border border-red-500/20 hover:border-red-500/70 rounded-2xl p-4 transition-all duration-300 shadow-md hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] md:col-span-2">
+                    <div class="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 font-extrabold text-sm shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.3)] group-hover:scale-110 transition-transform">
+                        ✕
+                    </div>
+                    <span class="text-white text-xs sm:text-sm font-semibold tracking-wide">Teams Excel aur WhatsApp pe business chala rahi hain.</span>
                 </div>
             </div>
 
             <!-- Result Highlight Callout -->
-            <div class="bg-gradient-to-r from-red-500/10 via-orange-500/10 to-transparent border-l-4 border-brand-orange rounded-r-xl p-4 sm:p-6">
-                <div class="text-brand-orange text-[10px] sm:text-xs font-extrabold uppercase tracking-wider mb-1">Result?</div>
-                <p class="text-white text-sm sm:text-lg font-bold leading-snug">
-                    Business grow karta hai... System nahi.
+            <div class="relative bg-gradient-to-r from-red-950/40 via-orange-950/20 to-[#0F1629] border-l-4 border-red-500 rounded-r-2xl p-5 sm:p-7 shadow-lg overflow-hidden">
+                <div class="flex items-center gap-2 text-red-400 text-xs sm:text-sm font-extrabold uppercase tracking-widest mb-1.5">
+                    <span class="text-base">⚠️</span>
+                    <span>Result?</span>
+                </div>
+                <p class="text-white text-base sm:text-xl font-extrabold leading-snug tracking-tight">
+                    Business grow karta hai... <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-400 to-amber-300">System nahi.</span>
                 </p>
-                <p class="text-gray-300 text-xs sm:text-sm font-medium mt-1">
-                    Aur jab systems scale nahi karte... <span class="text-red-400 font-bold">Business ruk jaata hai.</span>
+                <p class="text-gray-300 text-xs sm:text-base font-medium mt-1.5 leading-relaxed">
+                    Aur jab systems scale nahi karte... <span class="text-red-400 font-extrabold underline decoration-red-500/40">Business ruk jaata hai.</span>
                 </p>
             </div>
 
