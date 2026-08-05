@@ -46,8 +46,6 @@
         .mesh-glow    { animation: float 8s ease-in-out infinite; }
         .ticker-track { display: flex; gap: 8px; animation: ticker 18s linear infinite; width: max-content; }
         .ticker-track:hover { animation-play-state: paused; }
-
-        body { overflow: hidden; }
     </style>
 </head>
 <body class="font-sans text-white bg-[#0B1121] antialiased selection:bg-brand-orange selection:text-white relative">
@@ -68,8 +66,8 @@
         </header>
     </div>
 
-    <!-- MAIN HERO (100dvh, no scroll) -->
-    <main style="height:100dvh;overflow:hidden;" class="w-full max-w-5xl mx-auto pt-[58px] sm:pt-[80px] pb-2 sm:pb-6 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3">
+    <!-- MAIN HERO -->
+    <main class="w-full max-w-5xl mx-auto min-h-screen pt-[58px] sm:pt-[80px] pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3">
 
         <!-- Ambient glows -->
         <div class="absolute top-[20%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] bg-blue-900/20 blur-[90px] rounded-full pointer-events-none -z-10"></div>
@@ -298,6 +296,77 @@
 
         </div><!-- End lower group -->
     </main>
+
+    <!-- ══════════════════════════════════════
+         SECTION 2: THE GROWTH BOTTLENECK
+    ══════════════════════════════════════ -->
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+        
+        <!-- Background ambient glow -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-red-900/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+
+        <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-5 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            
+            <!-- Top badge -->
+            <div class="flex justify-center sm:justify-start mb-4">
+                <div class="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1 text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    The Real Bottleneck
+                </div>
+            </div>
+
+            <!-- Heading -->
+            <h2 class="text-xl sm:text-3xl md:text-4xl font-extrabold text-white text-center sm:text-left leading-snug sm:leading-tight mb-4">
+                Aaj Ka Biggest Business Problem Website Ya App Nahi Hai... 
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400">It's Growth.</span>
+            </h2>
+
+            <!-- Intro text -->
+            <p class="text-gray-300 text-xs sm:text-base leading-relaxed text-center sm:text-left mb-6 max-w-3xl">
+                Bahut si companies lakhon rupaye marketing mein invest karti hain. Leads bhi aate hain. Team bhi badi hoti hai. <span class="text-white font-semibold underline decoration-red-500/50">Lekin...</span>
+            </p>
+
+            <!-- Problem points list -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
+                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
+                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Operations manual hain.</span>
+                </div>
+
+                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
+                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
+                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Multiple software use ho rahe hain.</span>
+                </div>
+
+                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
+                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
+                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Website sirf brochure banke reh gayi hai.</span>
+                </div>
+
+                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors">
+                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
+                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Mobile app customers use hi nahi karte.</span>
+                </div>
+
+                <div class="flex items-center gap-3 bg-[#131C35]/80 border border-[#2A3552] rounded-xl p-3 sm:p-4 hover:border-red-500/40 transition-colors md:col-span-2">
+                    <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">❌</div>
+                    <span class="text-gray-200 text-xs sm:text-sm font-medium">Teams Excel aur WhatsApp pe business chala rahi hain.</span>
+                </div>
+            </div>
+
+            <!-- Result Highlight Callout -->
+            <div class="bg-gradient-to-r from-red-500/10 via-orange-500/10 to-transparent border-l-4 border-brand-orange rounded-r-xl p-4 sm:p-6">
+                <div class="text-brand-orange text-[10px] sm:text-xs font-extrabold uppercase tracking-wider mb-1">Result?</div>
+                <p class="text-white text-sm sm:text-lg font-bold leading-snug">
+                    Business grow karta hai... System nahi.
+                </p>
+                <p class="text-gray-300 text-xs sm:text-sm font-medium mt-1">
+                    Aur jab systems scale nahi karte... <span class="text-red-400 font-bold">Business ruk jaata hai.</span>
+                </p>
+            </div>
+
+        </div>
+    </section>
 
     <script>
         // ── Ticker: duplicate items for infinite loop ──
