@@ -1131,7 +1131,143 @@ router.post("/check-lead-duplicate", async (req, res) => {
   }
 });
 
+/**
+ * Automatically seeds default stage automation rules into Firebase RTDB under `whatsapp_stage_automations/firstoptionagency`.
+ * Rules configured:
+ * 1. 1st Connection (`in_progress`):
+ *    - 5 minutes after 1st connection -> Fill survey reminder (with link https://self.infiplus.in/survey)
+ *    - 5 hours after 1st connection -> 2nd survey reminder (with link https://self.infiplus.in/survey)
+ * 2. Survey Completed (`survey_completed`):
+ *    - 5 minutes after survey completed -> Book meeting reminder (with link https://self.infiplus.in/meeting)
+ *    - 5 hours after survey completed -> 2nd book meeting reminder (with link https://self.infiplus.in/meeting)
+ * 3. Meeting Booked (`meeting_booked`):
+ *    - 5 hours before scheduled meeting -> Meeting reminder with Google Meet link
+ *    - 5 minutes before scheduled meeting -> Final meeting alert with Google Meet link
+ */
+async function seedDefaultStageRulesToFirebase() {
+  try {
+    const rulesToSeed = {
+      in_progress: {
+        rule_in_progress_5m: {
+          id: "rule_in_progress_5m",
+          stageId: "in_progress",
+          title: "5 Min Survey Form Link Reminder",
+          triggerBase: "created",
+          offsetType: "after",
+          offsetValue: 5,
+          offsetUnit: "minutes",
+          template: "Hi {{name}}, thank you for contacting us! Please fill out our quick survey form to get started with your consultation: https://self.infiplus.in/survey",
+          isEnabled: true,
+          applyToExisting: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        rule_in_progress_5h: {
+          id: "rule_in_progress_5h",
+          stageId: "in_progress",
+          title: "5 Hour Survey Form Link Reminder",
+          triggerBase: "created",
+          offsetType: "after",
+          offsetValue: 5,
+          offsetUnit: "hours",
+          template: "Hi {{name}}, we noticed you haven't completed your qualification survey yet. Complete it now so we can schedule your strategy call: https://self.infiplus.in/survey",
+          isEnabled: true,
+          applyToExisting: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      survey_completed: {
+        rule_survey_completed_5m: {
+          id: "rule_survey_completed_5m",
+          stageId: "survey_completed",
+          title: "5 Min Book Meeting Reminder",
+          triggerBase: "created",
+          offsetType: "after",
+          offsetValue: 5,
+          offsetUnit: "minutes",
+          template: "Hi {{name}}, thank you for completing our survey! Select your preferred 1-on-1 strategy session meeting time here: https://self.infiplus.in/meeting",
+          isEnabled: true,
+          applyToExisting: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        rule_survey_completed_5h: {
+          id: "rule_survey_completed_5h",
+          stageId: "survey_completed",
+          title: "5 Hour Book Meeting Reminder",
+          triggerBase: "created",
+          offsetType: "after",
+          offsetValue: 5,
+          offsetUnit: "hours",
+          template: "Hi {{name}}, don't forget to lock in your 1-on-1 strategy session! Select your date & time slot here: https://self.infiplus.in/meeting",
+          isEnabled: true,
+          applyToExisting: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      meeting_booked: {
+        rule_meeting_booked_5h: {
+          id: "rule_meeting_booked_5h",
+          stageId: "meeting_booked",
+          title: "5 Hour Meeting Alert",
+          triggerBase: "meeting",
+          offsetType: "before",
+          offsetValue: 5,
+          offsetUnit: "hours",
+          template: "Hi {{name}}, friendly reminder! Your 1-on-1 strategy session is coming up in 5 hours at {{time}}! Google Meet link: {{meeting_url}}",
+          isEnabled: true,
+          applyToExisting: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        rule_meeting_booked_5m: {
+          id: "rule_meeting_booked_5m",
+          stageId: "meeting_booked",
+          title: "5 Min Meeting Alert",
+          triggerBase: "meeting",
+          offsetType: "before",
+          offsetValue: 5,
+          offsetUnit: "minutes",
+          template: "Hi {{name}}, your 1-on-1 strategy session starts in 5 minutes! Join the call here: {{meeting_url}}",
+          isEnabled: true,
+          applyToExisting: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    };
+
+    console.log("⚡ [Firebase Rule Seeder] Saving stage automation rules to Firebase RTDB...");
+    await firebaseDb("whatsapp_stage_automations/firstoptionagency", "PATCH", rulesToSeed);
+    console.log("✅ [Firebase Rule Seeder] Rules successfully saved in Firebase RTDB!");
+    return rulesToSeed;
+  } catch (err) {
+    console.error("❌ [Firebase Rule Seeder] Error seeding rules:", err);
+    throw err;
+  }
+}
+
+/**
+ * POST /api/whatsapp/seed-default-rules
+ */
+router.post("/seed-default-rules", async (req, res) => {
+  try {
+    const rules = await seedDefaultStageRulesToFirebase();
+    return res.status(200).json({ success: true, message: "Default stage rules seeded to Firebase RTDB", data: rules });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Auto-seed rules on server startup
+seedDefaultStageRulesToFirebase().catch((err) =>
+  console.error("Auto-seed rules exception on startup:", err)
+);
+
 module.exports = router;
 module.exports.syncLeadAutomations = syncLeadAutomations;
 module.exports.cancelAllLeadTasks = cancelAllLeadTasks;
+module.exports.seedDefaultStageRulesToFirebase = seedDefaultStageRulesToFirebase;
 
