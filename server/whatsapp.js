@@ -903,32 +903,6 @@ async function sendMetaCloudApiFounderNotification({ fullName, email, phone, boo
     );
 
     console.log("📱 Founder Meta WhatsApp Notifications Result:", results);
-
-    // Backup: Also send instant WhatsApp notification via active connected Baileys WhatsApp instance to 919958399157
-    try {
-      const config = (await firebaseDb("whatsapp_configuration/firstoptionagency")) || {};
-      const instanceName = await resolveActiveInstance(config.selectedInstanceName);
-      if (instanceName) {
-        const founderAlertText =
-          `🚨 *NEW APPOINTMENT / LEAD ALERT!* 🚀\n\n` +
-          `A new appointment / lead has been booked!\n\n` +
-          `👤 *Lead Name:* ${fullName || "N/A"}\n` +
-          `📞 *Phone:* ${phone || "N/A"}\n` +
-          `📧 *Email:* ${email || "N/A"}\n` +
-          `📅 *Booked Time / Date:* ${formattedTime}\n\n` +
-          `⚡ *Action Required:* Call or WhatsApp this client directly to confirm!`;
-
-        for (const fNum of founderNumbers) {
-          await evoApiCall(`/message/sendText/${instanceName}`, "POST", {
-            number: fNum,
-            text: founderAlertText,
-          }).catch((err) => console.error("Evo Founder Alert Error:", err));
-        }
-      }
-    } catch (backupErr) {
-      console.error("Backup Baileys Founder Alert Exception:", backupErr);
-    }
-
     return { success: true, results };
   } catch (err) {
     console.error("sendMetaCloudApiFounderNotification Exception:", err);

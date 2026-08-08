@@ -175,58 +175,65 @@ async function generateAndSendWhatsAppCard({
       `We're excited to help you scale your business revenue!`;
 
     if (sendWithCard) {
-      console.log(`🎨 [ID CARD SERVER]: Rendering PNG image for ${fullName} (${recipientPhone})...`);
-      const cardBuffer = await generateConfirmationCardBuffer({
-        fullName,
-        phone: recipientPhone,
-        email,
-        date,
-        time,
-      });
+      try {
+        console.log(`🎨 [ID CARD SERVER]: Rendering PNG image for ${fullName} (${recipientPhone})...`);
+        const cardBuffer = await generateConfirmationCardBuffer({
+          fullName,
+          phone: recipientPhone,
+          email,
+          date,
+          time,
+        });
 
-      const base64Image = cardBuffer.toString("base64");
+        const base64Image = cardBuffer.toString("base64");
 
-      console.log(`📤 [ID CARD SERVER]: Sending WhatsApp Media Card via Evolution API (${activeInstance})...`);
-      const mediaResponse = await fetch(`${evoApiUrl}/message/sendMedia/${activeInstance}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: evoApiKey,
-        },
-        body: JSON.stringify({
-          number: recipientPhone,
-          mediatype: "image",
-          mimetype: "image/png",
-          caption: captionText,
-          media: base64Image,
-          fileName: `Confirmation_Card_${(fullName || "Client").replace(/\s+/g, "_")}.png`,
-        }),
-      });
+        console.log(`📤 [ID CARD SERVER]: Sending WhatsApp Media Card via Evolution API (${activeInstance})...`);
+        const mediaResponse = await fetch(`${evoApiUrl}/message/sendMedia/${activeInstance}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: evoApiKey,
+          },
+          body: JSON.stringify({
+            number: recipientPhone,
+            mediatype: "image",
+            mimetype: "image/png",
+            caption: captionText,
+            media: base64Image,
+            fileName: `Confirmation_Card_${(fullName || "Client").replace(/\s+/g, "_")}.png`,
+          }),
+        });
 
-      const resData = await mediaResponse.json();
-      console.log(`✅ [ID CARD SERVER]: WhatsApp Media Card Dispatch Result:`, resData);
-      const isSuccess = mediaResponse.ok && !resData.error;
-      return { success: isSuccess, sendWithCard: true, result: resData };
-    } else {
-      console.log(`💬 [ID CARD SERVER]: Sending WhatsApp Text Notification (without card) to ${recipientPhone}...`);
-      const textResponse = await fetch(`${evoApiUrl}/message/sendText/${activeInstance}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: evoApiKey,
-        },
-        body: JSON.stringify({
-          number: recipientPhone,
-          text: captionText,
-        }),
-      });
-
-      const resData = await textResponse.json();
-      console.log(`✅ [ID CARD SERVER]: WhatsApp Text Dispatch Result:`, resData);
-      return { success: true, sendWithCard: false, result: resData };
+        const resData = await mediaResponse.json();
+        const isSuccess = mediaResponse.ok && !resData.error;
+        if (isSuccess) {
+          console.log(`✅ [ID CARD SERVER]: WhatsApp Media Card Dispatch Result:`, resData);
+          return { success: true, sendWithCard: true, result: resData };
+        }
+        console.warn(`⚠️ [ID CARD SERVER]: Media Card dispatch failed/errored, executing automatic text fallback...`, resData);
+      } catch (cardErr) {
+        console.error("🎨 [ID CARD SERVER]: Card image rendering exception, executing automatic text fallback:", cardErr);
+      }
     }
+
+    console.log(`💬 [ID CARD SERVER]: Sending WhatsApp Text Notification to ${recipientPhone}...`);
+    const textResponse = await fetch(`${evoApiUrl}/message/sendText/${activeInstance}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: evoApiKey,
+      },
+      body: JSON.stringify({
+        number: recipientPhone,
+        text: captionText,
+      }),
+    });
+
+    const resData = await textResponse.json();
+    console.log(`✅ [ID CARD SERVER]: WhatsApp Text Dispatch Result:`, resData);
+    return { success: textResponse.ok, sendWithCard: false, result: resData };
   } catch (err) {
-    console.error("🔥 [ID CARD SERVER ERROR]: Failed to generate/send WhatsApp card:", err);
+    console.error("🔥 [ID CARD SERVER ERROR]: Failed to send WhatsApp meeting message:", err);
     return { success: false, error: err.message };
   }
 }
