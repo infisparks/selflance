@@ -569,10 +569,34 @@ export function BookingModal({
     saveOrUpdateLead(meetingPayload, emailPrefixId, createdDate, activeCampaign.id).catch((err) =>
       console.error("Async meeting save error:", err)
     );
+
+    // Trigger automated WhatsApp meeting confirmation & founder alert on 9958399157
+    const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
+    const cleanPhone = contactInfo.phone.replace(/\D/g, "");
+    const fullPhoneNumber = `${contactInfo.countryCode}${cleanPhone}`;
+
+    fetch(`${serverUrl}/api/whatsapp/auto-send-meeting`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: contactInfo.fullName,
+        email: contactInfo.email,
+        phone: fullPhoneNumber,
+        date: appointmentDateStr,
+        time: timeSlot,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.meetingUrl) {
+          setGeneratedMeetUrl(data.meetingUrl);
+        }
+      })
+      .catch((err) => console.error("Async WhatsApp Meeting Confirmation Error:", err));
   };
 
   const whatsappMessage = `Hi Selflance, I just booked a Strategy Session.\nName: ${contactInfo.fullName || "User"}\nEmail: ${contactInfo.email || "N/A"}\nPhone: ${contactInfo.countryCode} ${contactInfo.phone || "N/A"}\nBooked Slot: ${formattedBookingDate} at ${selectedTimeSlot || "02:00 PM"}`;
-  const whatsappUrl = `https://wa.me/919100000000?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappUrl = `https://wa.me/919958399157?text=${encodeURIComponent(whatsappMessage)}`;
 
   const qualificationQuestions = activeCampaign.questions;
 

@@ -727,11 +727,32 @@ export async function saveOrUpdateLead(
     // Merge meeting data: use new meeting if user selected/re-selected a slot (lead.meeting), otherwise keep existing meeting
     const mergedMeeting = lead.meeting || existingLead?.meeting;
 
-    // Preserve existing pipelineStage & stageMovedAt if lead already exists in CRM, otherwise fallback to lead.pipelineStage
+    // Stage Progression Helper: Ensure pipelineStage advances when higher stage priority is reached
+    const getStagePriority = (stg?: string) => {
+      if (!stg) return 0;
+      if (stg === "won" || stg === "closed_won") return 5;
+      if (stg === "meeting_scheduled" || stg === "meeting_booked") return 4;
+      if (stg === "survey_completed") return 3;
+      if (stg === "qualified" || stg === "followup") return 2;
+      if (stg === "raw" || stg === "1st Connection") return 1;
+      return 1;
+    };
+
+    const existingStagePriority = getStagePriority(existingLead?.pipelineStage);
+    const newStagePriority = getStagePriority(lead.pipelineStage);
+
+    // Advance to new pipeline stage if new stage priority is higher or equal to existing stage
+    const mergedPipelineStage =
+      newStagePriority >= existingStagePriority
+        ? (lead.pipelineStage || existingLead?.pipelineStage || "raw")
+        : (existingLead?.pipelineStage || lead.pipelineStage || "raw");
+
+    const mergedStageMovedAt =
+      mergedPipelineStage !== existingLead?.pipelineStage
+        ? (lead.stageMovedAt || timestamp)
+        : (existingLead?.stageMovedAt || timestamp);
     const mergedNotes = lead.notes || existingLead?.notes;
     const mergedFollowUpDate = lead.followUpDate || existingLead?.followUpDate;
-    const mergedPipelineStage = existingLead?.pipelineStage || lead.pipelineStage;
-    const mergedStageMovedAt = existingLead?.pipelineStage ? existingLead?.stageMovedAt : (lead.stageMovedAt || timestamp);
     const mergedDealValue = lead.dealValue !== undefined ? lead.dealValue : existingLead?.dealValue;
     const mergedOnboarded = lead.onboarded !== undefined ? lead.onboarded : existingLead?.onboarded;
     const mergedOnboardedAt = lead.onboardedAt || existingLead?.onboardedAt;

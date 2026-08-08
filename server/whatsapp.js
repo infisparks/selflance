@@ -681,6 +681,114 @@ router.post("/config", async (req, res) => {
 });
 
 /**
+ * REUSABLE MODULAR SERVER HELPER:
+ * Atomically updates lead pipelineStage, status, and meeting attributes across Firebase RTDB.
+ * Eliminates duplicate inline database patch queries and ensures 100% accurate CRM stage progression.
+ *
+ * @param {Object} params
+ * @param {string} params.phone - Client phone number
+ * @param {string} params.email - Client email address
+ * @param {string} [params.pipelineStage] - New CRM pipeline stage (e.g., "meeting_scheduled", "survey_completed")
+ * @param {string} [params.status] - New lead status ("partial", "survey_completed", "completed")
+ * @param {string} [params.meetingDate] - Booked appointment date (YYYY-MM-DD)
+ * @param {string} [params.meetingTime] - Booked time slot (e.g. "02:00 PM")
+ * @param {string} [params.meetingUrl] - Meeting URL (static Google Meet link)
+ * @param {string} [params.campaignName] - Target campaign name ("firstoptionagency")
+ */
+async function updateLeadStageInFirebase({
+  phone,
+  email,
+  pipelineStage,
+  status,
+  meetingDate,
+  meetingTime,
+  meetingUrl,
+  campaignName = "firstoptionagency",
+}) {
+  try {
+    const cleanPhoneNum = phone ? sanitizePhoneNumber(phone) : "";
+    const cleanEmailStr = email ? email.toLowerCase().trim() : "";
+    const emailPrefix = cleanEmailStr ? cleanEmailStr.replace(/[^a-z0-9]/g, "_") : "";
+    const timestamp = new Date().toISOString();
+
+    const campaignsObj = (await firebaseDb("campaigns")) || {};
+    for (const [cKey, campaignData] of Object.entries(campaignsObj)) {
+      if (!campaignData || typeof campaignData !== "object") continue;
+      const leadsNode = campaignData.leads || {};
+
+      for (const [dKey, leadsDateGroup] of Object.entries(leadsNode)) {
+        if (!leadsDateGroup || typeof leadsDateGroup !== "object") continue;
+
+        // Clean up orphan root nodes if improperly created
+        if (emailPrefix && dKey === emailPrefix) {
+          await firebaseDb(`campaigns/${cKey}/leads/${dKey}`, "DELETE");
+          continue;
+        }
+
+        for (const [lId, leadObj] of Object.entries(leadsDateGroup)) {
+          if (leadObj && typeof leadObj === "object") {
+            const lEmail = (leadObj.email || "").toLowerCase().trim();
+            const lPhone = sanitizePhoneNumber(leadObj.phone);
+
+            if (
+              (cleanEmailStr && lEmail === cleanEmailStr) ||
+              (cleanPhoneNum && lPhone === cleanPhoneNum) ||
+              (emailPrefix && lId.includes(emailPrefix))
+            ) {
+              const patchPayload = { updatedAt: timestamp };
+              if (pipelineStage) {
+                patchPayload.pipelineStage = pipelineStage;
+                patchPayload.stageMovedAt = timestamp;
+              }
+              if (status) {
+                patchPayload.status = status;
+              }
+
+              // Atomically update lead stage and status in Firebase RTDB
+              await firebaseDb(`campaigns/${cKey}/leads/${dKey}/${lId}`, "PATCH", patchPayload);
+
+              // Update meeting details if provided
+              if (meetingDate || meetingTime || meetingUrl) {
+                const meetingPatch = { bookedAt: timestamp };
+                if (meetingDate) meetingPatch.meetingDate = meetingDate;
+                if (meetingTime) meetingPatch.meetingTime = meetingTime;
+                if (meetingUrl) meetingPatch.meetingUrl = meetingUrl;
+
+                await firebaseDb(`campaigns/${cKey}/leads/${dKey}/${lId}/meeting`, "PATCH", meetingPatch);
+              }
+            }
+          }
+        }
+      }
+
+      // Also update top-level meeting index if date is provided
+      if (meetingDate && campaignData.meetings && campaignData.meetings[meetingDate]) {
+        const meetingsDateGroup = campaignData.meetings[meetingDate];
+        for (const [lId, mObj] of Object.entries(meetingsDateGroup)) {
+          if (mObj && typeof mObj === "object") {
+            const mEmail = (mObj.email || "").toLowerCase().trim();
+            const mPhone = sanitizePhoneNumber(mObj.phone);
+            if (
+              (cleanEmailStr && mEmail === cleanEmailStr) ||
+              (cleanPhoneNum && mPhone === cleanPhoneNum) ||
+              (emailPrefix && lId.includes(emailPrefix))
+            ) {
+              const meetingPatch = { updatedAt: timestamp };
+              if (meetingTime) meetingPatch.meetingTime = meetingTime;
+              if (meetingUrl) meetingPatch.meetingUrl = meetingUrl;
+
+              await firebaseDb(`campaigns/${cKey}/meetings/${meetingDate}/${lId}`, "PATCH", meetingPatch);
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[updateLeadStageInFirebase Exception]:", err);
+  }
+}
+
+/**
  * Helper to send Official Meta WhatsApp Cloud API Notifications to Founders Array ok
  */
 async function sendMetaCloudApiFounderNotification({ fullName, email, phone, bookingTime }) {
@@ -795,6 +903,32 @@ async function sendMetaCloudApiFounderNotification({ fullName, email, phone, boo
     );
 
     console.log("📱 Founder Meta WhatsApp Notifications Result:", results);
+
+    // Backup: Also send instant WhatsApp notification via active connected Baileys WhatsApp instance to 919958399157
+    try {
+      const config = (await firebaseDb("whatsapp_configuration/firstoptionagency")) || {};
+      const instanceName = await resolveActiveInstance(config.selectedInstanceName);
+      if (instanceName) {
+        const founderAlertText =
+          `🚨 *NEW APPOINTMENT / LEAD ALERT!* 🚀\n\n` +
+          `A new appointment / lead has been booked!\n\n` +
+          `👤 *Lead Name:* ${fullName || "N/A"}\n` +
+          `📞 *Phone:* ${phone || "N/A"}\n` +
+          `📧 *Email:* ${email || "N/A"}\n` +
+          `📅 *Booked Time / Date:* ${formattedTime}\n\n` +
+          `⚡ *Action Required:* Call or WhatsApp this client directly to confirm!`;
+
+        for (const fNum of founderNumbers) {
+          await evoApiCall(`/message/sendText/${instanceName}`, "POST", {
+            number: fNum,
+            text: founderAlertText,
+          }).catch((err) => console.error("Evo Founder Alert Error:", err));
+        }
+      }
+    } catch (backupErr) {
+      console.error("Backup Baileys Founder Alert Exception:", backupErr);
+    }
+
     return { success: true, results };
   } catch (err) {
     console.error("sendMetaCloudApiFounderNotification Exception:", err);
@@ -1008,68 +1142,17 @@ router.post("/auto-send-meeting", async (req, res) => {
       console.error("[Auto Send Meeting] Task queue purge exception:", err);
     }
 
-    // Save resolved meeting URL on actual lead & meeting objects in Firebase RTDB
+    // Save resolved meeting URL & update CRM pipeline stage to meeting_scheduled in Firebase RTDB
     if (email || phone) {
-      const cleanPhoneNum = sanitizePhoneNumber(phone);
-      const cleanEmailStr = email ? email.toLowerCase().trim() : "";
-      const emailPrefix = cleanEmailStr ? cleanEmailStr.replace(/[^a-z0-9]/g, "_") : "";
-
-      const campaignsObj = (await firebaseDb("campaigns")) || {};
-      for (const [cKey, campaignData] of Object.entries(campaignsObj)) {
-        if (!campaignData || typeof campaignData !== "object") continue;
-        const leadsNode = campaignData.leads || {};
-
-        for (const [dKey, leadsDateGroup] of Object.entries(leadsNode)) {
-          if (!leadsDateGroup || typeof leadsDateGroup !== "object") continue;
-
-          // Clean up orphan node if created directly under leads (e.g. mudassirs472_gmail_com)
-          if (emailPrefix && dKey === emailPrefix) {
-            await firebaseDb(`campaigns/${cKey}/leads/${dKey}`, "DELETE");
-            continue;
-          }
-
-          // Search date container for the real lead object
-          for (const [lId, leadObj] of Object.entries(leadsDateGroup)) {
-            if (leadObj && typeof leadObj === "object") {
-              const lEmail = (leadObj.email || "").toLowerCase().trim();
-              const lPhone = sanitizePhoneNumber(leadObj.phone);
-              if (
-                (cleanEmailStr && lEmail === cleanEmailStr) ||
-                (cleanPhoneNum && lPhone === cleanPhoneNum) ||
-                (emailPrefix && lId.includes(emailPrefix))
-              ) {
-                await firebaseDb(
-                  `campaigns/${cKey}/leads/${dKey}/${lId}/meeting`,
-                  "PATCH",
-                  { meetingUrl: resolvedMeetingUrl }
-                );
-              }
-            }
-          }
-        }
-
-        // Update meeting index node if present
-        if (date && campaignData.meetings && campaignData.meetings[date]) {
-          const meetingsDateGroup = campaignData.meetings[date];
-          for (const [lId, mObj] of Object.entries(meetingsDateGroup)) {
-            if (mObj && typeof mObj === "object") {
-              const mEmail = (mObj.email || "").toLowerCase().trim();
-              const mPhone = sanitizePhoneNumber(mObj.phone);
-              if (
-                (cleanEmailStr && mEmail === cleanEmailStr) ||
-                (cleanPhoneNum && mPhone === cleanPhoneNum) ||
-                (emailPrefix && lId.includes(emailPrefix))
-              ) {
-                await firebaseDb(
-                  `campaigns/${cKey}/meetings/${date}/${lId}`,
-                  "PATCH",
-                  { meetingUrl: resolvedMeetingUrl }
-                );
-              }
-            }
-          }
-        }
-      }
+      await updateLeadStageInFirebase({
+        phone,
+        email,
+        pipelineStage: "meeting_scheduled",
+        status: "completed",
+        meetingDate: date,
+        meetingTime: time,
+        meetingUrl: resolvedMeetingUrl,
+      });
     }
 
     if (cardResult && cardResult.success) {
@@ -1500,7 +1583,9 @@ ${description}
 });
 
 router.sendMetaCloudApiFounderNotification = sendMetaCloudApiFounderNotification;
+router.updateLeadStageInFirebase = updateLeadStageInFirebase;
 module.exports = router;
 module.exports.sendMetaCloudApiFounderNotification = sendMetaCloudApiFounderNotification;
+module.exports.updateLeadStageInFirebase = updateLeadStageInFirebase;
 
 
