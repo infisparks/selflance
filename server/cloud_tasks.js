@@ -157,17 +157,72 @@ async function deleteScheduledHttpTask({ taskId, taskName }) {
   }
 }
 
+const FIREBASE_DB_URL = (
+  process.env.FIREBASE_DATABASE_URL ||
+  process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL ||
+  "https://selflance-8e2a8-default-rtdb.firebaseio.com"
+).replace(/\/$/, "");
+const FIREBASE_DB_SECRET = process.env.FIREBASE_DB_SECRET || process.env.FIREBASE_DATABASE_SECRET || "";
+
+async function firebaseDbRead(path) {
+  try {
+    const authQuery = FIREBASE_DB_SECRET ? `?auth=${encodeURIComponent(FIREBASE_DB_SECRET)}` : "";
+    const res = await fetch(`${FIREBASE_DB_URL}/${path}.json${authQuery}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+}
+
+async function listScheduledTasksFromFirebase() {
+  try {
+    const allScheduledObj = (await firebaseDbRead("whatsapp_scheduled_tasks")) || {};
+    const formattedTasks = [];
+
+    for (const [phone, tasksMap] of Object.entries(allScheduledObj)) {
+      if (!tasksMap || typeof tasksMap !== "object") continue;
+      for (const [taskId, record] of Object.entries(tasksMap)) {
+        if (!record || typeof record !== "object") continue;
+        formattedTasks.push({
+          name: record.taskName || `projects/gcp/locations/asia-south1/queues/whatsapp/tasks/${taskId}`,
+          taskId: taskId,
+          scheduleTimeSeconds: record.scheduledTimeSeconds || (record.scheduleTimeMs ? Math.floor(record.scheduleTimeMs / 1000) : Math.floor(Date.now() / 1000) + 300),
+          leadPhone: record.leadPhone || (phone ? `+${phone}` : "Unknown Phone"),
+          ruleTitle: record.ruleTitle || record.title || "Stage Automation Rule",
+          stageId: record.stageId || "Active Pipeline Stage",
+          payload: record,
+        });
+      }
+    }
+
+    formattedTasks.sort((a, b) => a.scheduleTimeSeconds - b.scheduleTimeSeconds);
+    return { success: true, tasks: formattedTasks, source: "firebase" };
+  } catch (err) {
+    console.error("[listScheduledTasksFromFirebase Error]:", err);
+    return { success: true, tasks: [], source: "firebase_fallback" };
+  }
+}
+
 async function listScheduledTasks() {
   try {
     const projectId = process.env.GCP_PROJECT_ID || "firstoption-8da25";
     const location = process.env.GCP_LOCATION || "asia-south1";
     const queueName = process.env.GCP_QUEUE_NAME || "whatsapp-automation-queue";
 
+    // Fast timeout promise (3 seconds) to prevent UI modal from hanging
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("GCP Cloud Tasks connection timeout")), 3000)
+    );
+
     const client = getCloudTasksClient();
     const parent = client.queuePath(projectId, location, queueName);
 
-    const [tasks] = await client.listTasks({ parent, responseView: "FULL" });
-    
+    const [tasks] = await Promise.race([
+      client.listTasks({ parent, responseView: "FULL" }),
+      timeoutPromise,
+    ]);
+
     const formattedTasks = tasks.map((task) => {
       let payload = {};
       try {
@@ -186,8 +241,7 @@ async function listScheduledTasks() {
       } catch (e) {}
 
       const rawTaskId = payload.taskId || task.name.split("/").pop() || "";
-      
-      // Fallback parsing from task ID structure: task_PHONE_RULEID_MEETINGKEY_TIMESTAMP
+
       let extractedPhone = payload.leadPhone;
       if (!extractedPhone && rawTaskId.startsWith("task_")) {
         const parts = rawTaskId.split("_");
@@ -208,10 +262,10 @@ async function listScheduledTasks() {
     });
 
     formattedTasks.sort((a, b) => a.scheduleTimeSeconds - b.scheduleTimeSeconds);
-    return { success: true, tasks: formattedTasks };
+    return { success: true, tasks: formattedTasks, source: "gcp" };
   } catch (err) {
-    console.error(`[Cloud Tasks ⚠️] Error listing tasks:`, err.message || err);
-    return { success: false, error: err.message || String(err) };
+    console.warn(`[Cloud Tasks ℹ️] GCP Queue fetch timeout/unavailable (${err.message}). Reading scheduled queue from Firebase RTDB...`);
+    return await listScheduledTasksFromFirebase();
   }
 }
 
