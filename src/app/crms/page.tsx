@@ -12,25 +12,7 @@ import {
   saveOrUpdateLead,
   syncLeadCloudTasks,
   updateLeadStaffFields,
-  onboardLeadClient,
-  getAllOnboardedRecords,
-  deleteOnboardRecord,
-  updateOnboardRecordDealValue,
-  getRoles,
-  createRole,
-  deleteRole,
   syncAndGetUser,
-  getAllUsers,
-  setUserRoleByEmail,
-  registerUserByEmail,
-  updateUserStaffDetails,
-  getFlowTemplates,
-  createFlowTemplate,
-  deleteFlowTemplate,
-  assignFlowToClient,
-  getAllClientFlows,
-  markClientFlowCompleted,
-  deleteClientFlowInstance,
   getAllSupportTickets,
   updateSupportTicketStatus,
   deleteSupportTicket,
@@ -39,12 +21,7 @@ import {
   sanitizeEmailToId,
   LeadData,
   StaffNote,
-  OnboardRecord,
-  RoleData,
   UserData,
-  FlowTemplate,
-  FlowTaskTemplate,
-  ClientFlowInstance,
   db,
   markDateAsBooked,
   markSlotsAsBooked,
@@ -87,7 +64,7 @@ export interface StageAutomationRule {
   isEnabled: boolean;
 }
 
-const SERVER_URL = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://first.infiplus.in").replace(/\/$/, "");
+const SERVER_URL = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
 
 // Pipeline Stages Config
 const DEFAULT_PIPELINE_STAGES: PipelineStageConfig[] = [
@@ -236,7 +213,7 @@ export default function CRMPage() {
 
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [selectedCampaign, setSelectedCampaign] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState<"leads" | "pipeline" | "meetings" | "calendar" | "onboarded" | "roles" | "tickets">("pipeline");
+  const [activeTab, setActiveTab] = useState<"leads" | "pipeline" | "meetings" | "calendar" | "roles" | "tickets">("pipeline");
 
   // Support Tickets Management State
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
@@ -250,14 +227,14 @@ export default function CRMPage() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab") as any;
-      if (tabParam && ["leads", "pipeline", "meetings", "calendar", "onboarded", "roles", "tickets"].includes(tabParam)) {
+      if (tabParam && ["leads", "pipeline", "meetings", "calendar", "roles", "tickets"].includes(tabParam)) {
         setActiveTab(tabParam);
       }
     }
   }, []);
 
   // Helper to switch active tab and sync URL query parameter
-  const changeTab = useCallback((tab: "leads" | "pipeline" | "meetings" | "calendar" | "onboarded" | "roles" | "tickets") => {
+  const changeTab = useCallback((tab: "leads" | "pipeline" | "meetings" | "calendar" | "tickets") => {
     setActiveTab(tab);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -293,59 +270,9 @@ export default function CRMPage() {
   const [allLeadsList, setAllLeadsList] = useState<LeadData[]>([]);
   const [meetingsList, setMeetingsList] = useState<any[]>([]);
   const [allMeetingsList, setAllMeetingsList] = useState<any[]>([]);
-  const [allOnboardedList, setAllOnboardedList] = useState<OnboardRecord[]>([]);
-  const [rolesList, setRolesList] = useState<RoleData[]>([]);
-  const [usersList, setUsersList] = useState<UserData[]>([]);
-  const [flowTemplatesList, setFlowTemplatesList] = useState<FlowTemplate[]>([]);
-  const [clientFlowInstancesList, setClientFlowInstancesList] = useState<ClientFlowInstance[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-
-  // ROLES & USER MANAGEMENT STATE
-  const [newRoleName, setNewRoleName] = useState("");
-  const [newRoleDescription, setNewRoleDescription] = useState("");
-  const [isCreatingRole, setIsCreatingRole] = useState(false);
-  const [roleErrorMessage, setRoleErrorMessage] = useState<string | null>(null);
-  const [roleSuccessMessage, setRoleSuccessMessage] = useState<string | null>(null);
-
-  // MANUAL EMAIL USER REGISTRATION STATE
-  const [newRegisterName, setNewRegisterName] = useState("");
-  const [newRegisterEmail, setNewRegisterEmail] = useState("");
-  const [newRegisterPhone, setNewRegisterPhone] = useState("");
-  const [newRegisterUid, setNewRegisterUid] = useState("");
-  const [newRegisterRoleId, setNewRegisterRoleId] = useState("role_onboarding");
-  const [isRegisteringUser, setIsRegisteringUser] = useState(false);
-
-  // EDIT STAFF USER MODAL STATE
-  const [editingStaffUser, setEditingStaffUser] = useState<UserData | null>(null);
-  const [editStaffName, setEditStaffName] = useState("");
-  const [editStaffPhone, setEditStaffPhone] = useState("");
-  const [editStaffUid, setEditStaffUid] = useState("");
-  const [editStaffRoleId, setEditStaffRoleId] = useState("");
-  const [isSavingStaffEdit, setIsSavingStaffEdit] = useState(false);
-
-  // WORKFLOW TEMPLATE BUILDER STATE
-  const [newFlowName, setNewFlowName] = useState("");
-  const [newFlowDescription, setNewFlowDescription] = useState("");
-  const [flowDraftTasks, setFlowDraftTasks] = useState<FlowTaskTemplate[]>([]);
-  const [draftTaskTitle, setDraftTaskTitle] = useState("");
-  const [draftTaskRoleId, setDraftTaskRoleId] = useState("");
-  const [draftTaskType, setDraftTaskType] = useState<"checkbox" | "text" | "both">("both");
-  const [isCreatingFlow, setIsCreatingFlow] = useState(false);
-
-  // ASSIGN FLOW TO CLIENT MODAL STATE
-  const [assignFlowModalClient, setAssignFlowModalClient] = useState<OnboardRecord | null>(null);
-  const [selectedFlowTemplateId, setSelectedFlowTemplateId] = useState<string>("");
-  const [customAssignedFlowName, setCustomAssignedFlowName] = useState<string>("");
-  const [isAssigningFlow, setIsAssigningFlow] = useState(false);
-
-  // DELETE ASSIGNED CLIENT FLOW MODAL STATE
-  const [deleteClientFlowModal, setDeleteClientFlowModal] = useState<ClientFlowInstance | null>(null);
-  const [isDeletingClientFlow, setIsDeletingClientFlow] = useState(false);
-
-  // VIEW LIVE FLOW AUDIT MODAL STATE FOR ADMIN
-  const [viewFlowAuditModal, setViewFlowAuditModal] = useState<ClientFlowInstance | null>(null);
 
   // Pipeline Advanced Date Filter Controls
   const [pipelineTargetField, setPipelineTargetField] = useState<"meeting" | "created" | "followup">("created");
@@ -798,17 +725,7 @@ export default function CRMPage() {
   const [followUpDateInput, setFollowUpDateInput] = useState("");
   const [dealValueInput, setDealValueInput] = useState<string>("");
   const [isSavingStaffData, setIsSavingStaffData] = useState(false);
-  const [isOnboarding, setIsOnboarding] = useState(false);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-
-  // ONBOARD CONFIRMATION MODAL STATE
-  const [onboardConfirmModalLead, setOnboardConfirmModalLead] = useState<LeadData | null>(null);
-  const [onboardMode, setOnboardMode] = useState<"append" | "replace">("append");
-
-  // DELETE ONBOARD MODAL STATE
-  const [deleteOnboardModalRecord, setDeleteOnboardModalRecord] = useState<OnboardRecord | null>(null);
-  const [deleteConfirmInput, setDeleteConfirmInput] = useState<string>("");
-  const [isDeletingOnboard, setIsDeletingOnboard] = useState<boolean>(false);
 
   // Day Meetings Modal Popup State
   const [dayMeetingsModalData, setDayMeetingsModalData] = useState<{
@@ -898,7 +815,7 @@ export default function CRMPage() {
     }
   };
 
-  // Check Auth State & Access Control (Admin Only Access)
+  // Check Auth State & Access Control (Assume Admin Access for All Authenticated Users)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -907,20 +824,14 @@ export default function CRMPage() {
         setCurrentUser(user);
         const userData = await syncAndGetUser(user.uid, user.email || "");
         setCurrentUserData(userData);
-
-        const isAdmin = user.uid === MASTER_ADMIN_UID || userData.roleId === "role_admin" || userData.roleName.toLowerCase() === "admin" || user.email?.toLowerCase().startsWith("firstoption");
-        if (!isAdmin) {
-          setAccessDenied(true);
-        } else {
-          setAccessDenied(false);
-        }
+        setAccessDenied(false);
         setAuthLoading(false);
       }
     });
     return () => unsubscribe();
   }, [router]);
 
-  // Fetch Dashboard, Pipeline, Calendar, Onboarded Data, Roles, Users, Flows
+  // Fetch Dashboard, Pipeline, Calendar, Roles, Users, Tickets
   const fetchData = useCallback(async () => {
     if (!currentUser || accessDenied) return;
     setIsDataLoading(true);
@@ -930,33 +841,18 @@ export default function CRMPage() {
         fetchedMeetings,
         fetchedAllMeetings,
         fetchedAllLeads,
-        fetchedOnboarded,
-        fetchedRoles,
-        fetchedUsers,
-        fetchedFlows,
-        fetchedClientFlows,
         fetchedTickets,
       ] = await Promise.all([
         getLeadsForDate(selectedDate, selectedCampaign),
         getMeetingsForDate(selectedDate, selectedCampaign),
         getAllMeetings(selectedCampaign),
         getAllLeadsAcrossDates(selectedCampaign),
-        getAllOnboardedRecords(selectedCampaign),
-        getRoles(),
-        getAllUsers(),
-        getFlowTemplates(),
-        getAllClientFlows(),
         getAllSupportTickets(),
       ]);
       setLeadsList(fetchedLeads);
       setMeetingsList(fetchedMeetings);
       setAllMeetingsList(fetchedAllMeetings);
       setAllLeadsList(fetchedAllLeads);
-      setAllOnboardedList(fetchedOnboarded);
-      setRolesList(fetchedRoles);
-      setUsersList(fetchedUsers);
-      setFlowTemplatesList(fetchedFlows);
-      setClientFlowInstancesList(fetchedClientFlows);
       setSupportTickets(fetchedTickets);
     } catch (err) {
       console.error("CRM Data Fetch Error:", err);
@@ -1067,341 +963,13 @@ export default function CRMPage() {
     setSelectedLead(null);
   };
 
-  // Create Role Action
-  const handleCreateNewRole = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRoleErrorMessage(null);
-    setRoleSuccessMessage(null);
 
-    const cleanName = newRoleName.trim();
-    if (!cleanName) {
-      setRoleErrorMessage("Please enter a role name.");
-      return;
-    }
 
-    if (cleanName.toLowerCase() === "admin") {
-      setRoleErrorMessage("Cannot create 'Admin' role. Admin is a system default role.");
-      return;
-    }
 
-    setIsCreatingRole(true);
-    const res = await createRole(cleanName, newRoleDescription);
-    setIsCreatingRole(false);
 
-    if (res.success && res.role) {
-      setRolesList((prev) => [...prev, res.role!]);
-      setNewRoleName("");
-      setNewRoleDescription("");
-      setRoleSuccessMessage(`Role '${cleanName}' created successfully!`);
-    } else {
-      setRoleErrorMessage(res.message || "Failed to create role.");
-    }
-  };
 
-  // Soft Delete Role Action
-  const handleDeleteRole = async (role: RoleData) => {
-    setRoleErrorMessage(null);
-    setRoleSuccessMessage(null);
 
-    if (role.name.toLowerCase() === "admin" || role.id === "role_admin") {
-      setRoleErrorMessage(`System 'Admin' role cannot be deleted.`);
-      return;
-    }
 
-    const res = await deleteRole(role.id);
-    if (res.success) {
-      setRolesList((prev) => prev.filter((r) => r.id !== role.id));
-      setRoleSuccessMessage(`Role '${role.name}' soft deleted (isDeleted: true).`);
-    } else {
-      setRoleErrorMessage(res.message || "Failed to soft delete role.");
-    }
-  };
-
-  // Manual Email User Registration Handler
-  const handleManualRegisterUserByEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRoleErrorMessage(null);
-    setRoleSuccessMessage(null);
-
-    const cleanEmail = newRegisterEmail.trim();
-
-    if (!cleanEmail) {
-      setRoleErrorMessage("Please enter a valid User Email address.");
-      return;
-    }
-
-    const targetRoleObj = rolesList.find((r) => r.id === newRegisterRoleId) || { id: "role_onboarding", name: "Onboarding Specialist" };
-    const isMaster = cleanEmail.toLowerCase().startsWith("firstoption");
-
-    if (!isMaster && (targetRoleObj.id === "role_admin" || targetRoleObj.name.toLowerCase() === "admin")) {
-      setRoleErrorMessage("Cannot assign Admin role to non-Master email accounts.");
-      return;
-    }
-
-    setIsRegisteringUser(true);
-    const res = await registerUserByEmail(
-      cleanEmail,
-      targetRoleObj.id,
-      targetRoleObj.name,
-      newRegisterName,
-      newRegisterPhone,
-      newRegisterUid
-    );
-    setIsRegisteringUser(false);
-
-    if (res.success && res.user) {
-      setUsersList((prev) => {
-        const exists = prev.some((u) => u.email.toLowerCase() === cleanEmail.toLowerCase());
-        if (exists) {
-          return prev.map((u) => (u.email.toLowerCase() === cleanEmail.toLowerCase() ? res.user! : u));
-        }
-        return [...prev, res.user!];
-      });
-      setNewRegisterName("");
-      setNewRegisterEmail("");
-      setNewRegisterPhone("");
-      setNewRegisterUid("");
-      setRoleSuccessMessage(`Staff member '${res.user.name || cleanEmail}' registered successfully with '${targetRoleObj.name}' role!`);
-    } else {
-      setRoleErrorMessage(res.message || "Failed to add staff member.");
-    }
-  };
-
-  const handleOpenEditStaffModal = (user: UserData) => {
-    setEditingStaffUser(user);
-    setEditStaffName(user.name || "");
-    setEditStaffPhone(user.phone || "");
-    setEditStaffUid(user.uid || "");
-    setEditStaffRoleId(user.roleId || "role_onboarding");
-  };
-
-  const handleSaveStaffDetails = async () => {
-    if (!editingStaffUser) return;
-    setIsSavingStaffEdit(true);
-    const emailId = editingStaffUser.emailId || sanitizeEmailToId(editingStaffUser.email);
-    const isEditingAdmin = editingStaffUser.email?.toLowerCase().startsWith("firstoption") || editingStaffUser.uid === MASTER_ADMIN_UID || editingStaffUser.roleId === "role_admin" || editingStaffUser.roleName?.toLowerCase() === "admin";
-
-    const targetRoleObj = isEditingAdmin
-      ? { id: "role_admin", name: "Admin" }
-      : rolesList.find((r) => r.id === editStaffRoleId) || { id: editingStaffUser.roleId, name: editingStaffUser.roleName };
-
-    const updatedData: Partial<UserData> = {
-      name: editStaffName.trim(),
-      phone: editStaffPhone.trim(),
-      roleId: targetRoleObj.id,
-      roleName: targetRoleObj.name,
-    };
-
-    if (!isEditingAdmin) {
-      updatedData.uid = editStaffUid.trim();
-    }
-
-    const res = await updateUserStaffDetails(emailId, updatedData);
-    setIsSavingStaffEdit(false);
-
-    if (res.success) {
-      setUsersList((prev) =>
-        prev.map((u) => (u.emailId === emailId || u.email === editingStaffUser.email ? { ...u, ...updatedData } : u))
-      );
-      setRoleSuccessMessage(`Details for '${editStaffName || editingStaffUser.email}' saved!`);
-      setEditingStaffUser(null);
-    } else {
-      setRoleErrorMessage(res.message || "Failed to update user details.");
-    }
-  };
-
-  // Dispatch WhatsApp Flow Task Notifications to Assigned Staff Members
-  const dispatchStaffFlowWhatsAppNotifications = async (
-    clientName: string,
-    flowTitle: string,
-    flowTasks: any[]
-  ) => {
-    try {
-      const tasksByRole: Record<string, { title: string }[]> = {};
-      flowTasks.forEach((t) => {
-        if (!tasksByRole[t.roleId]) tasksByRole[t.roleId] = [];
-        tasksByRole[t.roleId].push({ title: t.title });
-      });
-
-      const domain = typeof window !== "undefined" ? window.location.host : "firstoptionagency.com";
-
-      for (const [roleId, tasks] of Object.entries(tasksByRole)) {
-        const matchingStaff = usersList.filter(
-          (u) => (u.roleId === roleId || (roleId === "role_onboarding" && u.roleName?.toLowerCase().includes("onboarding"))) &&
-                 u.phone && String(u.phone).trim().replace(/\D/g, "").length >= 5
-        );
-
-        for (const staff of matchingStaff) {
-          let cleanPhone = String(staff.phone || "").trim().replace(/\D/g, "");
-          if (cleanPhone.length === 10) {
-            cleanPhone = "91" + cleanPhone;
-          }
-
-          fetch(`${SERVER_URL}/api/whatsapp/notify-staff-flow`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              staffPhone: cleanPhone,
-              staffName: staff.name || staff.email,
-              clientName,
-              flowTitle,
-              roleName: staff.roleName,
-              tasks,
-              domain,
-            }),
-          }).catch((err) => console.error("Error dispatching staff WhatsApp notification:", err));
-        }
-      }
-    } catch (err) {
-      console.error("dispatchStaffFlowWhatsAppNotifications Error:", err);
-    }
-  };
-
-  // Assign / Change User Role Action By Email
-  const handleAssignUserRoleByEmail = async (targetEmail: string, targetRoleId: string) => {
-    setRoleErrorMessage(null);
-    setRoleSuccessMessage(null);
-
-    const targetRoleObj = rolesList.find((r) => r.id === targetRoleId);
-    if (!targetRoleObj) return;
-
-    const isMaster = targetEmail.toLowerCase().startsWith("firstoption");
-
-    if (!isMaster && (targetRoleId === "role_admin" || targetRoleObj.name.toLowerCase() === "admin")) {
-      setRoleErrorMessage("Admin role is strictly reserved for Master Admin accounts. You cannot assign Admin role to other staff emails.");
-      return;
-    }
-
-    const res = await setUserRoleByEmail(targetEmail, targetRoleId, targetRoleObj.name);
-    if (res.success) {
-      setUsersList((prev) =>
-        prev.map((u) => (u.email.toLowerCase() === targetEmail.toLowerCase() ? { ...u, roleId: targetRoleId, roleName: targetRoleObj.name } : u))
-      );
-      setRoleSuccessMessage(`Role for '${targetEmail}' updated to '${targetRoleObj.name}'!`);
-    } else {
-      setRoleErrorMessage(res.message || "Failed to update user role.");
-    }
-  };
-
-  // Add Task Step to Flow Template Draft
-  const handleAddDraftTaskToFlow = () => {
-    if (!draftTaskTitle.trim()) return;
-    const targetRole = rolesList.find((r) => r.id === draftTaskRoleId) || rolesList[0] || { id: "role_editor", name: "Editor" };
-
-    const newTask: FlowTaskTemplate = {
-      id: "ftask_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
-      roleId: targetRole.id,
-      roleName: targetRole.name,
-      title: draftTaskTitle.trim(),
-      type: draftTaskType,
-    };
-
-    setFlowDraftTasks((prev) => [...prev, newTask]);
-    setDraftTaskTitle("");
-  };
-
-  // Create Flow Template Handler
-  const handleCreateFlowTemplate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRoleErrorMessage(null);
-    setRoleSuccessMessage(null);
-
-    if (!newFlowName.trim()) {
-      setRoleErrorMessage("Please enter a Workflow Flow name.");
-      return;
-    }
-    if (flowDraftTasks.length === 0) {
-      setRoleErrorMessage("Please add at least one task step to the Flow.");
-      return;
-    }
-
-    setIsCreatingFlow(true);
-    const creatorEmail = currentUser?.email || "Admin";
-    const res = await createFlowTemplate(newFlowName, newFlowDescription, flowDraftTasks, creatorEmail);
-    setIsCreatingFlow(false);
-
-    if (res.success && res.flow) {
-      setFlowTemplatesList((prev) => [...prev, res.flow!]);
-      setNewFlowName("");
-      setNewFlowDescription("");
-      setFlowDraftTasks([]);
-      setRoleSuccessMessage(`Workflow Flow '${res.flow.name}' created successfully!`);
-    } else {
-      setRoleErrorMessage(res.message || "Failed to create Flow Template.");
-    }
-  };
-
-  // Delete Flow Template Handler
-  const handleDeleteFlowTemplate = async (flowId: string) => {
-    const res = await deleteFlowTemplate(flowId);
-    if (res.success) {
-      setFlowTemplatesList((prev) => prev.filter((f) => f.id !== flowId));
-      setRoleSuccessMessage("Workflow Flow template deleted.");
-    }
-  };
-
-  // Open Assign Flow Modal to Client
-  const handleOpenAssignFlowModal = (client: OnboardRecord) => {
-    setAssignFlowModalClient(client);
-    setSelectedFlowTemplateId(flowTemplatesList[0]?.id || "");
-    setCustomAssignedFlowName("");
-  };
-
-  // Execute Assign Flow to Client
-  const handleConfirmAssignFlowToClient = async () => {
-    if (!assignFlowModalClient || !selectedFlowTemplateId) return;
-    setIsAssigningFlow(true);
-
-    const adminEmail = currentUser?.email || "Admin";
-    const res = await assignFlowToClient(
-      assignFlowModalClient.id,
-      assignFlowModalClient.fullName,
-      assignFlowModalClient.email,
-      assignFlowModalClient.campaign,
-      selectedFlowTemplateId,
-      customAssignedFlowName,
-      adminEmail
-    );
-
-    if (res.success && res.instance) {
-      setClientFlowInstancesList((prev) => [...prev, res.instance!]);
-      setRoleSuccessMessage(`Flow '${res.instance.flowName}' assigned to client ${assignFlowModalClient.fullName}! Dispatched WhatsApp notifications to assigned staff.`);
-      
-      // Dispatch WhatsApp notifications to assigned staff members
-      await dispatchStaffFlowWhatsAppNotifications(
-        assignFlowModalClient.fullName,
-        res.instance.flowName,
-        res.instance.tasks
-      );
-    }
-    setIsAssigningFlow(false);
-    setAssignFlowModalClient(null);
-  };
-
-  // Mark Client Flow Instance Completed by Admin
-  const handleMarkClientFlowCompleted = async (clientFlowId: string) => {
-    const res = await markClientFlowCompleted(clientFlowId);
-    if (res.success) {
-      setClientFlowInstancesList((prev) =>
-        prev.map((cf) => (cf.id === clientFlowId ? { ...cf, status: "completed" } : cf))
-      );
-    }
-  };
-
-  // Delete Assigned Client Flow Instance
-  const handleConfirmDeleteClientFlow = async () => {
-    if (!deleteClientFlowModal) return;
-    setIsDeletingClientFlow(true);
-
-    const res = await deleteClientFlowInstance(deleteClientFlowModal.id);
-    if (res.success) {
-      setClientFlowInstancesList((prev) => prev.filter((cf) => cf.id !== deleteClientFlowModal.id));
-      setRoleSuccessMessage(`Assigned flow '${deleteClientFlowModal.flowName}' removed from ${deleteClientFlowModal.clientName}. You can now re-assign an updated flow.`);
-    }
-
-    setIsDeletingClientFlow(false);
-    setDeleteClientFlowModal(null);
-  };
 
   // Staff Action: Update Lead Stage
   const handleUpdateStage = async (lead: LeadData, newStage: string) => {
@@ -1430,57 +998,7 @@ export default function CRMPage() {
     syncLeadCloudTasks(updatedLead, lead.pipelineStage || null, null).catch(() => {});
   };
 
-  // Trigger Onboard Confirmation Modal
-  const handleOpenOnboardModal = (lead: LeadData) => {
-    setOnboardConfirmModalLead(lead);
-    setOnboardMode("append");
-  };
 
-  // Execute Onboarding after confirmation
-  const handleConfirmExecuteOnboard = async () => {
-    if (!onboardConfirmModalLead) return;
-    const lead = onboardConfirmModalLead;
-    const targetLeadId = lead.id || (lead.email ? sanitizeEmailToId(lead.email) : "lead_" + Date.now());
-    const staffEmail = currentUser?.email || "Staff";
-    const campaignName = lead.campaign || "firstoptionagency";
-
-    setIsOnboarding(true);
-
-    if (onboardMode === "replace" && lead.onboarded) {
-      const existingRecords = allOnboardedList.filter((r) => r.leadId === targetLeadId || r.email === lead.email);
-      for (const rec of existingRecords) {
-        await deleteOnboardRecord(rec.id, campaignName, rec.onboardedDate, targetLeadId, lead.createdDate);
-      }
-    }
-
-    const newCount = onboardMode === "replace" ? 1 : (lead.onboardCount || 0) + 1;
-    const timestamp = new Date().toISOString();
-
-    const updatedLead: LeadData = {
-      ...lead,
-      onboarded: true,
-      onboardedAt: timestamp,
-      onboardCount: newCount,
-      pipelineStage: "won",
-    };
-
-    setAllLeadsList((prev) =>
-      prev.map((l) => (l.id === targetLeadId || l.email === lead.email ? updatedLead : l))
-    );
-    setLeadsList((prev) =>
-      prev.map((l) => (l.id === targetLeadId || l.email === lead.email ? updatedLead : l))
-    );
-    if (selectedLead && (selectedLead.id === targetLeadId || selectedLead.email === lead.email)) {
-      setSelectedLead(updatedLead);
-    }
-
-    await onboardLeadClient(lead, staffEmail, campaignName);
-    const refreshedOnboards = await getAllOnboardedRecords(selectedCampaign);
-    setAllOnboardedList(refreshedOnboards);
-
-    setIsOnboarding(false);
-    setOnboardConfirmModalLead(null);
-  };
 
   // Open Delete Confirmation Modal
   const handleDeleteLead = (leadToDelete: LeadData) => {
@@ -1516,14 +1034,6 @@ export default function CRMPage() {
       if (res.success) {
         setAllLeadsList((prev) => prev.filter((l) => l.id !== targetLeadId && l.id !== leadToDelete.id));
         setLeadsList((prev) => prev.filter((l) => l.id !== targetLeadId && l.id !== leadToDelete.id));
-        setClientFlowInstancesList((prev) =>
-          prev.filter(
-            (cf) =>
-              cf.clientOnboardId !== targetLeadId &&
-              cf.clientOnboardId !== leadToDelete.id &&
-              (!leadToDelete.email || cf.clientEmail.toLowerCase() !== leadToDelete.email.toLowerCase())
-          )
-        );
         if (selectedLead && (selectedLead.id === targetLeadId || selectedLead.id === leadToDelete.id)) {
           setIsDrawerOpen(false);
           setSelectedLead(null);
@@ -1560,7 +1070,7 @@ export default function CRMPage() {
 
     setIsRescheduling(true);
     try {
-      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://first.infiplus.in").replace(/\/$/, "");
+      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
       const res = await fetch(`${serverUrl}/api/whatsapp/reschedule-meeting`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1629,39 +1139,6 @@ export default function CRMPage() {
     }
   };
 
-  // Trigger Delete Onboard Confirmation Modal
-  const handleOpenDeleteOnboardModal = (record: OnboardRecord) => {
-    setDeleteOnboardModalRecord(record);
-    setDeleteConfirmInput("");
-  };
-
-  // Execute Onboard Record Deletion
-  const handleConfirmDeleteOnboard = async () => {
-    if (!deleteOnboardModalRecord || deleteConfirmInput.trim() !== "CONFIRM") return;
-    setIsDeletingOnboard(true);
-
-    const targetLead = allLeadsList.find(
-      (l) => l.id === deleteOnboardModalRecord.leadId || l.email === deleteOnboardModalRecord.email
-    );
-
-    const success = await deleteOnboardRecord(
-      deleteOnboardModalRecord.id,
-      deleteOnboardModalRecord.campaign,
-      deleteOnboardModalRecord.onboardedDate,
-      deleteOnboardModalRecord.leadId,
-      targetLead?.createdDate || todayStr
-    );
-
-    if (success) {
-      setAllOnboardedList((prev) => prev.filter((r) => r.id !== deleteOnboardModalRecord.id));
-      await fetchData();
-    }
-
-    setIsDeletingOnboard(false);
-    setDeleteOnboardModalRecord(null);
-    setDeleteConfirmInput("");
-  };
-
   // Staff Action: Update Deal Value (₹)
   const handleSaveDealValue = async (valStr: string) => {
     if (!selectedLead) return;
@@ -1689,37 +1166,8 @@ export default function CRMPage() {
       setLeadsList((prev) =>
         prev.map((l) => (l.id === targetLeadId || l.email === selectedLead.email ? updatedLead : l))
       );
-      setAllOnboardedList((prev) =>
-        prev.map((ob) => (ob.leadId === targetLeadId || ob.email === selectedLead.email ? { ...ob, dealValue: valNum } : ob))
-      );
     }
     setIsSavingStaffData(false);
-  };
-
-  // Update Deal Value directly on Onboard Record
-  const handleUpdateOnboardRecordDealValue = async (obRecord: OnboardRecord, newVal: number) => {
-    const targetLead = allLeadsList.find(
-      (l) => l.id === obRecord.leadId || l.email === obRecord.email
-    );
-
-    setAllOnboardedList((prev) =>
-      prev.map((r) => (r.id === obRecord.id ? { ...r, dealValue: newVal } : r))
-    );
-    if (targetLead) {
-      const updatedLead = { ...targetLead, dealValue: newVal };
-      setAllLeadsList((prev) =>
-        prev.map((l) => (l.id === targetLead.id || l.email === targetLead.email ? updatedLead : l))
-      );
-    }
-
-    await updateOnboardRecordDealValue(
-      obRecord.id,
-      obRecord.campaign,
-      obRecord.onboardedDate,
-      newVal,
-      obRecord.leadId,
-      targetLead?.createdDate || todayStr
-    );
   };
 
   // Staff Action: Add note
@@ -1973,21 +1421,7 @@ export default function CRMPage() {
     return true;
   });
 
-  // Filtered Onboarded List
-  const filteredOnboardedList = allOnboardedList.filter((ob) => {
-    if (selectedCampaign !== "all" && ob.campaign !== selectedCampaign) return false;
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchesSearch =
-        (ob.fullName || "").toLowerCase().includes(q) ||
-        (ob.phone || "").includes(q) ||
-        (ob.email || "").toLowerCase().includes(q);
-      if (!matchesSearch) return false;
-    }
-
-    return true;
-  });
 
   // Calculate Metrics
   const totalLeadsCount = filteredLeads.length;
@@ -2254,26 +1688,6 @@ export default function CRMPage() {
 
               <button
                 onClick={() => {
-                  changeTab("onboarded");
-                  setIsMobileSidebarOpen(false);
-                }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === "onboarded"
-                    ? "bg-emerald-50 text-emerald-700 shadow-2xs font-extrabold border-l-4 border-emerald-600"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <i className="fa-solid fa-award text-sm text-emerald-600"></i>
-                <div className="flex items-center justify-between w-full">
-                  <span>Onboarded Clients</span>
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">
-                    {allOnboardedList.length}
-                  </span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
                   changeTab("tickets");
                   setIsMobileSidebarOpen(false);
                 }}
@@ -2313,31 +1727,10 @@ export default function CRMPage() {
                 className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-2xs"
               >
                 <i className="fa-solid fa-video text-sm text-indigo-600"></i>
-                <span>Google Meet & Integrations 🎥</span>
+                <span>Meeting Link & Integrations 🎥</span>
               </button>
 
-              <button
-                onClick={() => {
-                  changeTab("roles");
-                  setIsMobileSidebarOpen(false);
-                }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === "roles"
-                    ? "bg-indigo-50 text-indigo-700 shadow-2xs font-extrabold border-l-4 border-indigo-600"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <i className="fa-solid fa-user-gear text-sm text-indigo-600"></i>
-                <span>Roles & Workflow Flows</span>
-              </button>
 
-              <button
-                onClick={() => router.push("/management")}
-                className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors shadow-2xs"
-              >
-                <i className="fa-solid fa-users-gear text-sm text-violet-600"></i>
-                <span>Team Workspace (/management)</span>
-              </button>
             </div>
           </nav>
         </div>
@@ -2390,10 +1783,6 @@ export default function CRMPage() {
                 <h1 className="text-sm sm:text-lg font-bold text-slate-900">
                   {activeTab === "pipeline"
                     ? "Kanban Pipeline Board"
-                    : activeTab === "roles"
-                    ? "Roles & Workflow Flow Builder"
-                    : activeTab === "onboarded"
-                    ? "Onboarded Clients Directory"
                     : activeTab === "calendar"
                     ? "Meetings Calendar"
                     : "Executive CRM"}
@@ -2401,10 +1790,6 @@ export default function CRMPage() {
                 <p className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block">
                   {activeTab === "pipeline"
                     ? "Drag-and-drop lead stage management with deal value tracking & date filters"
-                    : activeTab === "roles"
-                    ? "Create custom staff roles & build Workflow Flow templates for team assignments"
-                    : activeTab === "onboarded"
-                    ? "Onboarded clients directory, assign custom workflow flows & editable deal values"
                     : activeTab === "calendar"
                     ? "Interactive visual calendar dashboard for managing all client appointments"
                     : "Real-time tracking of leads, survey qualifications, and booked strategy meetings"}
@@ -2448,492 +1833,7 @@ export default function CRMPage() {
 
         {/* Dashboard Body */}
         <main className="p-3 sm:p-6 space-y-4 sm:space-y-6 w-full max-w-full">
-          {/* DEDICATED TAB: ROLES & WORKFLOW FLOW TEMPLATES BUILDER */}
-          {activeTab === "roles" ? (
-            <div className="space-y-5 font-sans">
-              {/* Header Info Card */}
-              <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 shadow-sm space-y-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-lg text-indigo-600 shadow-2xs flex-shrink-0">
-                    <i className="fa-solid fa-diagram-project"></i>
-                  </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900">
-                      Roles, Staff Directory & Workflow Flow Templates
-                    </h2>
-                    <p className="text-xs text-slate-500 font-medium">
-                      Create Flow templates (e.g., <code className="font-mono text-indigo-700 bg-indigo-50 px-1 rounded">Team Danger</code>, <code className="font-mono text-indigo-700 bg-indigo-50 px-1 rounded">20 Jan Performance Flow</code>) and assign role tasks for team management.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => router.push("/crms/create-flow")}
-                  className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all self-start sm:self-auto flex items-center space-x-2 flex-shrink-0"
-                >
-                  <i className="fa-solid fa-plus text-xs"></i>
-                  <span>Open Create Flow Page 🚀</span>
-                </button>
-              </div>
-
-              {/* Toast Feedback Messages */}
-              {roleErrorMessage && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl text-xs font-bold flex items-center justify-between shadow-2xs">
-                  <div className="flex items-center space-x-2">
-                    <i className="fa-solid fa-triangle-exclamation text-rose-600 text-sm"></i>
-                    <span>{roleErrorMessage}</span>
-                  </div>
-                  <button
-                    onClick={() => setRoleErrorMessage(null)}
-                    className="text-rose-500 hover:text-rose-800 text-xs font-bold"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              )}
-
-              {roleSuccessMessage && (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-xs font-bold flex items-center justify-between shadow-2xs">
-                  <div className="flex items-center space-x-2">
-                    <i className="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
-                    <span>{roleSuccessMessage}</span>
-                  </div>
-                  <button
-                    onClick={() => setRoleSuccessMessage(null)}
-                    className="text-emerald-600 hover:text-emerald-800 text-xs font-bold"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              )}
-
-              {/* 1. AUTH USER MANAGEMENT & STAFF ROLES */}
-              <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900 flex items-center space-x-2">
-                      <i className="fa-solid fa-user-shield text-indigo-600"></i>
-                      <span>Staff Directory & Assigned Roles ({usersList.length})</span>
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Register staff with Name, Email, WhatsApp Phone & Role to enable automated flow task notifications.
-                    </p>
-                  </div>
-                  <span className="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-xl border border-indigo-200">
-                    /users
-                  </span>
-                </div>
-
-                {/* Form to Register Staff Member */}
-                <form onSubmit={handleManualRegisterUserByEmail} className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">Staff Member Name *</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Rahul Sharma"
-                        value={newRegisterName}
-                        onChange={(e) => setNewRegisterName(e.target.value)}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">User Email Address *</label>
-                      <input
-                        type="email"
-                        placeholder="e.g. staff@firstoptionagency.com"
-                        value={newRegisterEmail}
-                        onChange={(e) => setNewRegisterEmail(e.target.value)}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">WhatsApp Number *</label>
-                      <input
-                        type="tel"
-                        placeholder="e.g. +919876543210"
-                        value={newRegisterPhone}
-                        onChange={(e) => setNewRegisterPhone(e.target.value)}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">Staff UID (Optional)</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. usr_10293"
-                        value={newRegisterUid}
-                        onChange={(e) => setNewRegisterUid(e.target.value)}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                    <div className="sm:w-1/2 space-y-1">
-                      <label className="text-xs font-bold text-slate-700">Assign Staff Role *</label>
-                      <select
-                        value={newRegisterRoleId}
-                        onChange={(e) => setNewRegisterRoleId(e.target.value)}
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                      >
-                        {rolesList
-                          .filter((r) => r.id !== "role_admin" && r.name.toLowerCase() !== "admin")
-                          .map((r) => (
-                            <option key={r.id} value={r.id}>
-                              {r.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-
-                    <div className="sm:w-1/2 flex items-end">
-                      <button
-                        type="submit"
-                        disabled={isRegisteringUser || !newRegisterEmail.trim()}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-xs font-extrabold py-2 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                      >
-                        {isRegisteringUser ? (
-                          <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                        ) : (
-                          <i className="fa-solid fa-user-check text-xs"></i>
-                        )}
-                        <span>Add Staff Member & Assign Role 👤</span>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-
-                <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="w-full text-left text-xs text-slate-700">
-                    <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
-                      <tr>
-                        <th className="px-4 py-3">Staff Member</th>
-                        <th className="px-4 py-3">WhatsApp Number</th>
-                        <th className="px-4 py-3">Assigned Role</th>
-                        <th className="px-4 py-3">Last Updated</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {usersList.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="p-6 text-center text-slate-400 italic">
-                            No registered staff users found in Firebase /users node.
-                          </td>
-                        </tr>
-                      ) : (
-                        usersList.map((usr) => {
-                          const isMaster = usr.email?.toLowerCase().startsWith("firstoption") || usr.uid === MASTER_ADMIN_UID;
-                          const cleanPhone = String(usr.phone || "").trim();
-
-                          return (
-                            <tr key={usr.emailId || usr.email} className="hover:bg-slate-50/80 transition-colors">
-                              <td className="px-4 py-3">
-                                <div className="space-y-0.5">
-                                  <div className="font-extrabold text-slate-900 text-sm flex items-center space-x-2">
-                                    <span>{usr.name || usr.email.split("@")[0]}</span>
-                                    {isMaster && (
-                                      <span className="bg-indigo-100 text-indigo-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-indigo-300">
-                                        👑 Master Admin
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-[11px] text-slate-500 font-medium flex items-center space-x-2">
-                                    <span>{usr.email}</span>
-                                    {usr.uid && (
-                                      <span className="bg-slate-100 text-slate-600 font-mono text-[9px] px-1.5 py-0.2 rounded border border-slate-200">
-                                        UID: {usr.uid}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                {cleanPhone ? (
-                                  <span className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-xl text-xs font-mono font-bold">
-                                    <i className="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
-                                    <span>{cleanPhone}</span>
-                                  </span>
-                                ) : (
-                                  <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">
-                                    ⚠️ Missing Phone
-                                  </span>
-                                )}
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <span
-                                  className={`text-xs font-extrabold px-3 py-1 rounded-xl border ${
-                                    usr.roleId === "role_admin" || usr.roleName?.toLowerCase() === "admin"
-                                      ? "bg-indigo-100 text-indigo-900 border-indigo-300"
-                                      : "bg-indigo-50 text-indigo-800 border-indigo-200"
-                                  }`}
-                                >
-                                  {usr.roleName || "Onboarding Specialist"}
-                                </span>
-                              </td>
-
-                              <td className="px-4 py-3 text-[11px] font-mono text-slate-400">
-                                {usr.updatedAt ? new Date(usr.updatedAt).toLocaleString() : "Initial"}
-                              </td>
-
-                              <td className="px-4 py-3 text-right">
-                                <div className="flex items-center justify-end space-x-2">
-                                  <button
-                                    onClick={() => handleOpenEditStaffModal(usr)}
-                                    className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold px-2.5 py-1 rounded-xl transition-colors inline-flex items-center space-x-1 cursor-pointer"
-                                    title="Edit Name & WhatsApp Phone"
-                                  >
-                                    <i className="fa-solid fa-pen-to-square text-[10px]"></i>
-                                    <span>Edit ✏️</span>
-                                  </button>
-
-                                  {isMaster ? (
-                                    <span className="text-[11px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-xl">
-                                      Permanent Admin
-                                    </span>
-                                  ) : (
-                                    <select
-                                      value={usr.roleId || "role_onboarding"}
-                                      onChange={(e) => handleAssignUserRoleByEmail(usr.email, e.target.value)}
-                                      className="bg-white border border-slate-300 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
-                                    >
-                                      {rolesList
-                                        .filter((r) => r.id !== "role_admin" && r.name.toLowerCase() !== "admin")
-                                        .map((r) => (
-                                          <option key={r.id} value={r.id}>
-                                            {r.name}
-                                          </option>
-                                        ))}
-                                    </select>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* EDIT STAFF / ADMIN DETAILS MODAL */}
-              {editingStaffUser && (() => {
-                const isEditingAdmin = editingStaffUser.email?.toLowerCase().startsWith("firstoption") || editingStaffUser.uid === MASTER_ADMIN_UID || editingStaffUser.roleId === "role_admin" || editingStaffUser.roleName?.toLowerCase() === "admin";
-
-                return (
-                  <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
-                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h3 className="text-base font-extrabold text-slate-900 flex items-center space-x-2">
-                          <i className="fa-solid fa-user-pen text-indigo-600"></i>
-                          <span>{isEditingAdmin ? "Edit Admin Profile (Name & Phone)" : "Edit Staff Details"}</span>
-                        </h3>
-                        <button
-                          onClick={() => setEditingStaffUser(null)}
-                          className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      <div className="space-y-3 text-xs font-bold text-slate-700">
-                        <div>
-                          <label className="block mb-1">User Email (Read-Only)</label>
-                          <input
-                            type="email"
-                            disabled
-                            value={editingStaffUser.email}
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-500 font-mono"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block mb-1">Full Name *</label>
-                          <input
-                            type="text"
-                            value={editStaffName}
-                            onChange={(e) => setEditStaffName(e.target.value)}
-                            placeholder="e.g. Rahul Sharma"
-                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block mb-1">WhatsApp Phone Number *</label>
-                          <input
-                            type="tel"
-                            value={editStaffPhone}
-                            onChange={(e) => setEditStaffPhone(e.target.value)}
-                            placeholder="e.g. 9876543210"
-                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600"
-                          />
-                          <span className="text-[10px] text-slate-400 font-normal block mt-0.5">
-                            💡 Enter 10-digit number (e.g. 9876543210). Country code (+91) is automatically added when sending WhatsApp.
-                          </span>
-                        </div>
-
-                        {!isEditingAdmin && (
-                          <>
-                            <div>
-                              <label className="block mb-1">Staff UID</label>
-                              <input
-                                type="text"
-                                value={editStaffUid}
-                                onChange={(e) => setEditStaffUid(e.target.value)}
-                                placeholder="e.g. usr_10293"
-                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block mb-1">Assigned Role</label>
-                              <select
-                                value={editStaffRoleId}
-                                onChange={(e) => setEditStaffRoleId(e.target.value)}
-                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600"
-                              >
-                                {rolesList
-                                  .filter((r) => r.id !== "role_admin" && r.name.toLowerCase() !== "admin")
-                                  .map((r) => (
-                                    <option key={r.id} value={r.id}>
-                                      {r.name}
-                                    </option>
-                                  ))}
-                              </select>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
-                        <button
-                          onClick={() => setEditingStaffUser(null)}
-                          className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-colors cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleSaveStaffDetails}
-                          disabled={isSavingStaffEdit}
-                          className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-sm transition-colors flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
-                        >
-                          {isSavingStaffEdit && <i className="fa-solid fa-circle-notch fa-spin"></i>}
-                          <span>Save Changes 💾</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* 4. ROLES MANAGEMENT DIRECTORY */}
-              <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-slate-900 flex items-center space-x-2">
-                    <i className="fa-solid fa-shield-halved text-emerald-600"></i>
-                    <span>Active Firebase Roles ({rolesList.length})</span>
-                  </h3>
-                  <span className="text-xs font-mono font-bold text-slate-400">
-                    Firebase Node: /roles
-                  </span>
-                </div>
-
-                {/* Form to Create Role */}
-                <form onSubmit={handleCreateNewRole} className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700">Role Name *</label>
-                    <input
-                      type="text"
-                      placeholder="Enter role name (e.g. Designer, Editor...)"
-                      value={newRoleName}
-                      onChange={(e) => setNewRoleName(e.target.value)}
-                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700">Role Description</label>
-                    <input
-                      type="text"
-                      placeholder="Enter role description..."
-                      value={newRoleDescription}
-                      onChange={(e) => setNewRoleDescription(e.target.value)}
-                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-600"
-                    />
-                  </div>
-
-                  <div className="flex items-end">
-                    <button
-                      type="submit"
-                      disabled={isCreatingRole || !newRoleName.trim()}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold py-2 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-                    >
-                      {isCreatingRole ? (
-                        <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                      ) : (
-                        <i className="fa-solid fa-plus text-xs"></i>
-                      )}
-                      <span>Save Role ➕</span>
-                    </button>
-                  </div>
-                </form>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                  {rolesList.map((role) => {
-                    const isAdmin = role.name.toLowerCase() === "admin" || role.id === "role_admin";
-
-                    return (
-                      <div
-                        key={role.id}
-                        className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col justify-between hover:border-indigo-300 transition-colors shadow-2xs"
-                      >
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-extrabold text-slate-900">
-                              {role.name}
-                            </h4>
-
-                            {isAdmin && (
-                              <span className="text-[9px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-300 px-2 py-0.5 rounded-full uppercase">
-                                System Admin
-                              </span>
-                            )}
-                          </div>
-
-                          <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                            {role.description || "No description provided."}
-                          </p>
-                        </div>
-
-                        {!isAdmin && (
-                          <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                            <span>Soft Delete Protected</span>
-                            <button
-                              onClick={() => handleDeleteRole(role)}
-                              className="text-rose-600 hover:text-rose-800 text-xs font-bold bg-white border border-rose-200 px-2.5 py-1 rounded-xl transition-colors inline-flex items-center space-x-1"
-                            >
-                              <i className="fa-solid fa-trash-can text-[10px]"></i>
-                              <span>Delete Role</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : activeTab === "tickets" ? (
+          {activeTab === "tickets" ? (
             <div className="space-y-5 font-sans">
               {/* Top Header Card */}
               <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 shadow-sm space-y-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -3154,195 +2054,6 @@ export default function CRMPage() {
                 })()}
               </div>
             </div>
-          ) : activeTab === "onboarded" ? (
-            <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 space-y-5 font-sans">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <div>
-                  <h2 className="text-base sm:text-xl font-extrabold text-slate-900 flex items-center space-x-2">
-                    <i className="fa-solid fa-award text-emerald-600"></i>
-                    <span>Onboarded Clients Directory</span>
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Assign custom Workflow Flows (<code className="font-mono text-indigo-700 bg-indigo-50 px-1 rounded">Team Danger</code>, <code className="font-mono text-indigo-700 bg-indigo-50 px-1 rounded">20 Jan Performance Flow</code>) & manage deal values
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    placeholder="Search onboarded name, phone..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none w-48 sm:w-64"
-                  />
-                  <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-xl border border-emerald-300">
-                    {filteredOnboardedList.length} Total Onboards
-                  </span>
-                </div>
-              </div>
-
-              {/* Onboarded List Table */}
-              <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                <table className="w-full text-left text-xs text-slate-700">
-                  <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
-                    <tr>
-                      <th className="px-4 py-3">Client Info</th>
-                      <th className="px-4 py-3">Onboarded Date & Time</th>
-                      <th className="px-4 py-3">Assigned Workflow Flows</th>
-                      <th className="px-4 py-3">Editable Deal Value (₹)</th>
-                      <th className="px-4 py-3">Campaign & Staff</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    {filteredOnboardedList.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-400 italic">
-                          No onboarded client records found.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredOnboardedList.map((obRecord) => {
-                        const clientFlows = clientFlowInstancesList.filter((cf) => cf.clientOnboardId === obRecord.id || cf.clientEmail === obRecord.email);
-
-                        return (
-                          <tr key={obRecord.id} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="px-4 py-3">
-                              <div className="font-extrabold text-slate-900 text-sm">
-                                {obRecord.fullName || "Anonymous Client"}
-                              </div>
-                              <div className="text-[11px] text-slate-400 font-mono">{obRecord.email}</div>
-                              <div className="text-[11px] font-bold text-slate-600 font-mono pt-0.5">
-                                📞 {obRecord.countryCode} {obRecord.phone}
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div className="space-y-0.5">
-                                <span className="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-200 text-[11px] block w-fit">
-                                  📅 {obRecord.onboardedDate}
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-mono block">
-                                  {new Date(obRecord.onboardedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-3 space-y-1.5">
-                              {clientFlows.length === 0 ? (
-                                <button
-                                  onClick={() => handleOpenAssignFlowModal(obRecord)}
-                                  className="text-[10px] font-extrabold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 px-2 py-1 rounded-xl transition-all inline-flex items-center space-x-1 shadow-2xs"
-                                >
-                                  <i className="fa-solid fa-triangle-exclamation text-amber-600"></i>
-                                  <span>⚠️ No Flow Assigned — Click to Assign 🚀</span>
-                                </button>
-                              ) : (
-                                clientFlows.map((cf) => {
-                                  const doneCount = cf.tasks.filter((t) => t.isCompleted).length;
-                                  const isDone = cf.status === "completed";
-
-                                  return (
-                                    <div key={cf.id} className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-[10px] space-y-1 shadow-2xs">
-                                      <div className="flex items-center justify-between gap-1">
-                                        <span className="font-extrabold text-indigo-700 truncate max-w-[120px]">
-                                          🚀 {cf.flowName}
-                                        </span>
-
-                                        <div className="flex items-center space-x-1">
-                                          {isDone ? (
-                                            <span className="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded border border-emerald-300">
-                                              ✓ Done
-                                            </span>
-                                          ) : (
-                                            <button
-                                              onClick={() => handleMarkClientFlowCompleted(cf.id)}
-                                              className="text-[9px] bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-1.5 py-0.2 rounded transition-colors"
-                                            >
-                                              Mark Complete
-                                            </button>
-                                          )}
-
-                                          <button
-                                            onClick={() => setDeleteClientFlowModal(cf)}
-                                            className="text-rose-600 hover:text-rose-800 hover:bg-rose-100 p-0.5 rounded transition-colors font-bold"
-                                            title="Delete assigned flow to re-assign updated template"
-                                          >
-                                            <i className="fa-solid fa-trash-can text-[10px]"></i>
-                                          </button>
-                                        </div>
-                                      </div>
-
-                                      <div className="text-slate-500 flex items-center justify-between font-mono">
-                                        <span>Progress: {doneCount}/{cf.tasks.length} tasks</span>
-                                        <button
-                                          onClick={() => router.push(`/crms/view-flow?id=${cf.id}`)}
-                                          className="text-[9px] font-extrabold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-1.5 py-0.5 rounded border border-indigo-200 transition-colors shadow-2xs"
-                                        >
-                                          🚀 Open Flow Canvas Page
-                                        </button>
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                              )}
-
-                              {clientFlows.length > 0 && (
-                                <button
-                                  onClick={() => handleOpenAssignFlowModal(obRecord)}
-                                  className="text-[10px] font-extrabold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-2 py-1 rounded-lg transition-colors inline-flex items-center space-x-1"
-                                >
-                                  <i className="fa-solid fa-plus text-[9px]"></i>
-                                  <span>Assign Additional Flow</span>
-                                </button>
-                              )}
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div className="flex items-center space-x-1">
-                                <span className="font-bold text-emerald-700 text-xs">₹</span>
-                                <input
-                                  type="number"
-                                  defaultValue={obRecord.dealValue || 0}
-                                  onBlur={(e) => {
-                                    const newVal = parseFloat(e.target.value) || 0;
-                                    if (newVal !== obRecord.dealValue) {
-                                      handleUpdateOnboardRecordDealValue(obRecord, newVal);
-                                    }
-                                  }}
-                                  onWheel={(e) => e.currentTarget.blur()}
-                                  className="w-28 bg-emerald-50/60 border border-emerald-300 rounded-lg px-2 py-1 text-xs font-mono font-extrabold text-emerald-900 focus:outline-none focus:bg-white focus:border-indigo-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  title="Click to edit deal value"
-                                />
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-3 space-y-1">
-                              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-bold block w-fit">
-                                {obRecord.campaign || "firstoptionagency"}
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-bold block">
-                                By: {obRecord.onboardedBy || "Staff"}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3 text-right space-y-1">
-                              <button
-                                onClick={() => handleOpenDeleteOnboardModal(obRecord)}
-                                className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors inline-flex items-center space-x-1.5 shadow-2xs"
-                              >
-                                <i className="fa-solid fa-trash-can text-xs"></i>
-                                <span>Delete 🗑️</span>
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           ) : activeTab === "pipeline" ? (
             <div className="space-y-4 font-sans">
               {/* Pipeline Top Bar */}
@@ -3451,18 +2162,7 @@ export default function CRMPage() {
                   >
                     Pipeline Board
                   </button>
-                  <button
-                    onClick={() => changeTab("onboarded")}
-                    className="px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors text-emerald-700 font-extrabold whitespace-nowrap"
-                  >
-                    Onboarded Directory ({allOnboardedList.length})
-                  </button>
-                  <button
-                    onClick={() => changeTab("roles")}
-                    className="px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors text-indigo-700 font-extrabold whitespace-nowrap"
-                  >
-                    Roles & Flows ({flowTemplatesList.length})
-                  </button>
+
                   <button
                     onClick={() => changeTab("meetings")}
                     className="px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors whitespace-nowrap"
@@ -3868,28 +2568,6 @@ export default function CRMPage() {
                                 )}
 
                                 <div className="pt-2 border-t border-slate-100 space-y-1.5" onClick={(e) => e.stopPropagation()}>
-                                  {lead.onboarded ? (
-                                    <div className="flex items-center justify-between text-[10px]">
-                                      <span className="font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300">
-                                        ✓ Onboarded Done
-                                      </span>
-
-                                      <button
-                                        onClick={() => handleOpenOnboardModal(lead)}
-                                        className="font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md transition-colors"
-                                      >
-                                        + Re-onboard
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleOpenOnboardModal(lead)}
-                                      className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-[11px] font-extrabold py-1 px-2.5 rounded-lg shadow-2xs transition-all flex items-center justify-center space-x-1"
-                                    >
-                                      <i className="fa-solid fa-user-check text-[10px]"></i>
-                                      <span>Onboard Client</span>
-                                    </button>
-                                  )}
 
                                   <div className="flex items-center justify-between pt-0.5">
                                     <span className="text-[10px] text-slate-400 font-bold">Move Stage:</span>
@@ -5019,246 +3697,7 @@ export default function CRMPage() {
         </main>
       </div>
 
-      {/* ASSIGN FLOW TO CLIENT MODAL */}
-      {assignFlowModalClient && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="fixed inset-0" onClick={() => setAssignFlowModalClient(null)} />
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 space-y-4 border border-slate-200 z-10 font-sans animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center space-x-3 text-indigo-700">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-lg font-black shadow-2xs">
-                🚀
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Assign Workflow Flow to Client
-                </h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  {assignFlowModalClient.fullName} ({assignFlowModalClient.email})
-                </p>
-              </div>
-            </div>
 
-            <div className="space-y-3 pt-1">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Select Flow Template *</label>
-                <select
-                  value={selectedFlowTemplateId}
-                  onChange={(e) => setSelectedFlowTemplateId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                >
-                  {flowTemplatesList.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name} ({f.tasks.length} Steps)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Custom Flow Instance Name (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 20 Jan Performance Shoot & Ads"
-                  value={customAssignedFlowName}
-                  onChange={(e) => setCustomAssignedFlowName(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-600"
-                />
-                <p className="text-[10px] text-slate-400">
-                  You can assign multiple flows over time with custom shoot/campaign names.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setAssignFlowModalClient(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                disabled={isAssigningFlow || !selectedFlowTemplateId}
-                onClick={handleConfirmAssignFlowToClient}
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all flex items-center space-x-1.5 disabled:opacity-50"
-              >
-                {isAssigningFlow ? (
-                  <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                ) : (
-                  <i className="fa-solid fa-plus text-xs"></i>
-                )}
-                <span>Assign Flow Now 🚀</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ONBOARD CONFIRMATION MODAL POPUP */}
-      {onboardConfirmModalLead && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="fixed inset-0" onClick={() => setOnboardConfirmModalLead(null)} />
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 space-y-4 border border-slate-200 z-10 font-sans animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center space-x-3 text-emerald-700">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-lg font-black shadow-2xs">
-                🚀
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Onboard Client Confirmation
-                </h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  {onboardConfirmModalLead.fullName || "Client"}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2 text-xs">
-              <p className="text-slate-800 font-bold">
-                Are you sure you want to onboard <span className="text-indigo-600 font-extrabold">{onboardConfirmModalLead.fullName}</span>?
-              </p>
-              <div className="flex items-center justify-between text-slate-600 font-mono pt-1 border-t border-slate-200">
-                <span>Deal Value:</span>
-                <span className="font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
-                  ₹{(onboardConfirmModalLead.dealValue || 0).toLocaleString("en-IN")}
-                </span>
-              </div>
-            </div>
-
-            {onboardConfirmModalLead.onboarded && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2 text-xs">
-                <p className="font-extrabold text-amber-900 flex items-center space-x-1">
-                  <i className="fa-solid fa-triangle-exclamation text-amber-600"></i>
-                  <span>Client is already onboarded ({onboardConfirmModalLead.onboardCount || 1}x)</span>
-                </p>
-
-                <div className="space-y-1.5 pt-1">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="onboardMode"
-                      value="append"
-                      checked={onboardMode === "append"}
-                      onChange={() => setOnboardMode("append")}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span className="font-bold text-slate-800">
-                      Create Additional Onboard Snapshot (2nd Contract / Package)
-                    </span>
-                  </label>
-
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="onboardMode"
-                      value="replace"
-                      checked={onboardMode === "replace"}
-                      onChange={() => setOnboardMode("replace")}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span className="font-bold text-slate-800">
-                      Replace / Update Existing Onboard Snapshot
-                    </span>
-                  </label>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setOnboardConfirmModalLead(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                disabled={isOnboarding}
-                onClick={handleConfirmExecuteOnboard}
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md transition-all flex items-center space-x-1.5 disabled:opacity-50"
-              >
-                {isOnboarding ? (
-                  <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                ) : (
-                  <i className="fa-solid fa-check text-xs"></i>
-                )}
-                <span>Confirm & Onboard Now 🚀</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PROFESSIONAL DELETE ONBOARD CONFIRMATION MODAL */}
-      {deleteOnboardModalRecord && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="fixed inset-0" onClick={() => setDeleteOnboardModalRecord(null)} />
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 space-y-4 border border-rose-200 z-10 font-sans animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center space-x-3 text-rose-600">
-              <div className="w-10 h-10 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center text-lg font-black shadow-2xs">
-                ⚠️
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Delete Onboard Snapshot
-                </h3>
-                <p className="text-xs text-rose-600 font-bold">
-                  Permanent Data Removal Warning
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 space-y-2 text-xs">
-              <p className="text-rose-900 font-semibold leading-relaxed">
-                This action will permanently delete the onboarding record snapshot for{" "}
-                <strong className="text-slate-900 font-extrabold underline">{deleteOnboardModalRecord.fullName}</strong>{" "}
-                (₹{deleteOnboardModalRecord.dealValue?.toLocaleString("en-IN")}) from the <code className="font-mono bg-rose-100 px-1 rounded">/onboards</code> database.
-              </p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 block">
-                To confirm deletion, type <strong className="text-rose-700 font-mono tracking-wider">CONFIRM</strong> in the box below:
-              </label>
-              <input
-                type="text"
-                placeholder="Type CONFIRM here..."
-                value={deleteConfirmInput}
-                onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-rose-600"
-              />
-            </div>
-
-            <div className="flex items-center justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteOnboardModalRecord(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                disabled={deleteConfirmInput.trim() !== "CONFIRM" || isDeletingOnboard}
-                onClick={handleConfirmDeleteOnboard}
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition-all flex items-center space-x-1.5 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {isDeletingOnboard ? (
-                  <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                ) : (
-                  <i className="fa-solid fa-trash-can text-xs"></i>
-                )}
-                <span>Delete Snapshot 🗑️</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* DAY MEETINGS LIST MODAL POPUP */}
       {dayMeetingsModalData && (
@@ -5708,43 +4147,7 @@ export default function CRMPage() {
                   </p>
                 </div>
               )}
-              {/* ONBOARD CLIENT CARD & BUTTON IN DRAWER */}
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-2xs">
-                      🚀
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900">
-                        Client Onboarding Status
-                      </h4>
-                      <p className="text-[10px] text-slate-500">
-                        Pushes an immutable snapshot into <code className="font-mono text-emerald-700">/onboards</code> node
-                      </p>
-                    </div>
-                  </div>
 
-                  {selectedLead.onboarded && (
-                    <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full">
-                      ✓ Onboarded Done ({selectedLead.onboardCount || 1}x)
-                    </span>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => handleOpenOnboardModal(selectedLead)}
-                  disabled={isOnboarding}
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-extrabold py-2 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-                >
-                  {isOnboarding ? (
-                    <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                  ) : (
-                    <i className="fa-solid fa-user-check text-xs"></i>
-                  )}
-                  <span>{selectedLead.onboarded ? "Re-Onboard Client (+ Snapshot)" : "Onboard Client (+ Save Snapshot)"}</span>
-                </button>
-              </div>
 
               {/* Pipeline Stage Selector & Deal Value (₹) */}
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
@@ -6221,7 +4624,7 @@ export default function CRMPage() {
                     </div>
                     <div>
                       <h4 className="text-xs font-extrabold text-slate-900">Reschedule Meeting & Video Call</h4>
-                      <p className="text-[10px] text-slate-500">Set new date & time to auto-generate a new Google Meet link</p>
+                      <p className="text-[10px] text-slate-500">Set new date & time to update appointment details with your static meeting link</p>
                     </div>
                   </div>
                 </div>
@@ -6360,231 +4763,9 @@ export default function CRMPage() {
         </div>
       )}
 
-      {/* DELETE ASSIGNED CLIENT FLOW CONFIRMATION MODAL */}
-      {deleteClientFlowModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="fixed inset-0" onClick={() => setDeleteClientFlowModal(null)} />
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 space-y-4 border border-rose-200 z-10 font-sans animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center space-x-3 text-rose-600">
-              <div className="w-10 h-10 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center text-lg font-black shadow-2xs">
-                ⚠️
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Remove Assigned Flow
-                </h3>
-                <p className="text-xs text-rose-600 font-bold">
-                  {deleteClientFlowModal.flowName}
-                </p>
-              </div>
-            </div>
 
-            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 space-y-2 text-xs">
-              <p className="text-rose-900 font-semibold leading-relaxed">
-                Are you sure you want to remove assigned workflow flow <strong className="text-slate-900 font-extrabold underline">{deleteClientFlowModal.flowName}</strong> from client <strong className="text-slate-900 font-extrabold">{deleteClientFlowModal.clientName}</strong>?
-              </p>
-              <p className="text-rose-800 font-medium text-[11px]">
-                Deleting this instance will clear current task progress for this flow. You can re-assign an updated flow template to this client anytime!
-              </p>
-            </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteClientFlowModal(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
-              >
-                Cancel
-              </button>
 
-              <button
-                type="button"
-                disabled={isDeletingClientFlow}
-                onClick={handleConfirmDeleteClientFlow}
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition-all flex items-center space-x-1.5 disabled:opacity-50"
-              >
-                {isDeletingClientFlow ? (
-                  <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
-                ) : (
-                  <i className="fa-solid fa-trash-can text-xs"></i>
-                )}
-                <span>Confirm & Remove Flow 🗑️</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ADMIN LIVE FLOW AUDIT MODAL (Canvas Table Matrix Format) */}
-      {viewFlowAuditModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 font-sans">
-          <div className="fixed inset-0" onClick={() => setViewFlowAuditModal(null)} />
-          <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 z-10 flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-150">
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between sticky top-0 z-20">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md">
-                  👁️
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                    Live Flow Progress & Staff Audit Matrix
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Client: <strong className="text-slate-900">{viewFlowAuditModal.clientName}</strong> ({viewFlowAuditModal.clientEmail}) | Flow: <strong className="text-indigo-600">{viewFlowAuditModal.flowName}</strong>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <span className="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-xl border border-indigo-200">
-                  {viewFlowAuditModal.campaign}
-                </span>
-
-                <button
-                  onClick={() => setViewFlowAuditModal(null)}
-                  className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center transition-colors"
-                >
-                  <i className="fa-solid fa-xmark text-sm"></i>
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 overflow-y-auto space-y-4 flex-1">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-sm font-extrabold text-slate-900 flex items-center space-x-2">
-                  <i className="fa-solid fa-table-cells text-indigo-600"></i>
-                  <span>Staff Work Audit Matrix Table</span>
-                </h3>
-                <span className="text-xs text-slate-500 font-mono">
-                  {viewFlowAuditModal.tasks.filter((t) => t.isCompleted).length} / {viewFlowAuditModal.tasks.length} Steps Completed
-                </span>
-              </div>
-
-              {/* ROLE COLUMNS CANVAS FOR ADMIN (ZERO BLANK/EMPTY SPACE) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-                {rolesList.map((role) => {
-                  const roleTasks = viewFlowAuditModal.tasks.filter(
-                    (t) =>
-                      t.roleId === role.id ||
-                      t.roleName.toLowerCase() === role.name.toLowerCase()
-                  );
-
-                  const staffForRole = usersList.filter(
-                    (u) =>
-                      u.roleId === role.id ||
-                      u.roleName?.toLowerCase() === role.name.toLowerCase()
-                  );
-
-                  const completedRoleTasksCount = roleTasks.filter((t) => t.isCompleted).length;
-
-                  return (
-                    <div
-                      key={role.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3.5 flex flex-col justify-between"
-                    >
-                      <div className="border-b border-slate-200/80 pb-3 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-extrabold text-slate-900">
-                            {role.name}
-                          </h3>
-
-                          <span className="text-[10px] font-mono font-bold bg-white text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
-                            {completedRoleTasksCount}/{roleTasks.length} Tasks
-                          </span>
-                        </div>
-
-                        {staffForRole.length > 0 ? (
-                          <div className="text-[10px] font-mono font-extrabold text-indigo-700 bg-white border border-indigo-200 px-2 py-0.5 rounded-lg truncate">
-                            ✉️ {staffForRole.map((s) => s.email).join(", ")}
-                          </div>
-                        ) : (
-                          <div className="text-[9px] font-mono text-slate-400 italic">
-                            👤 Unassigned Email
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-3">
-                        {roleTasks.length === 0 ? (
-                          <div className="p-4 border border-dashed border-slate-200 rounded-xl text-center text-slate-400 text-xs italic">
-                            No tasks assigned to {role.name}.
-                          </div>
-                        ) : (
-                          roleTasks.map((task) => {
-                            const isTaskDone = Boolean(task.isCompleted === true);
-                            const originalStepIdx = viewFlowAuditModal.tasks.findIndex((t) => t.id === task.id) + 1;
-
-                            return (
-                              <div
-                                key={task.id}
-                                className={`bg-white border rounded-xl p-3 space-y-2.5 shadow-2xs ${
-                                  isTaskDone ? "border-emerald-200 bg-emerald-50/10" : "border-slate-200"
-                                }`}
-                              >
-                                <div className="flex items-start space-x-2">
-                                  <span className="w-5 h-5 rounded-md bg-indigo-600 text-white font-extrabold flex items-center justify-center text-[10px] shadow-2xs flex-shrink-0 mt-0.5">
-                                    #{originalStepIdx}
-                                  </span>
-                                  <h4 className="text-xs font-extrabold text-slate-900 leading-snug">
-                                    {task.title}
-                                  </h4>
-                                </div>
-
-                                <div className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 border border-slate-200">
-                                  <input
-                                    type="checkbox"
-                                    checked={isTaskDone}
-                                    onChange={() =>
-                                      handleMarkClientFlowCompleted(viewFlowAuditModal.id)
-                                    }
-                                    className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
-                                  />
-                                  <span className={`text-xs font-bold ${isTaskDone ? "text-emerald-800 line-through" : "text-slate-800"}`}>
-                                    {isTaskDone ? "Completed Step" : "Pending Check"}
-                                  </span>
-                                </div>
-
-                                {task.textValue && (
-                                  <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-mono font-bold break-all">
-                                    {task.textValue}
-                                  </div>
-                                )}
-
-                                {task.completedAt ? (
-                                  <div className="text-[10px] font-mono text-emerald-800 bg-emerald-100/90 border border-emerald-300 p-1.5 rounded-lg font-extrabold flex items-center justify-between">
-                                    <span>✓ {new Date(task.completedAt).toLocaleString([], { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true })}</span>
-                                    <span className="truncate max-w-[90px]">{task.completedBy?.split("@")[0]}</span>
-                                  </div>
-                                ) : (
-                                  <div className="text-[10px] font-mono text-amber-700 bg-amber-50 border border-amber-200 p-1 rounded-lg font-bold text-center">
-                                    ⏳ Pending
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between sticky bottom-0">
-              <span className="text-xs text-slate-500 font-mono">
-                Assigned by: {viewFlowAuditModal.assignedBy} on {new Date(viewFlowAuditModal.assignedAt).toLocaleDateString()}
-              </span>
-              <button
-                onClick={() => setViewFlowAuditModal(null)}
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-slate-200 hover:bg-slate-300 text-slate-800 transition-colors"
-              >
-                Close Audit View
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MANAGE PIPELINE STAGES & RECYCLE BIN MODAL */}
       {isManagePipelineModalOpen && (

@@ -17,19 +17,11 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Role-based auth redirect
+  // Role-based auth redirect - assume any authenticated user is Admin
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const { syncAndGetUser, MASTER_ADMIN_UID } = await import("@/lib/firebase");
-        const userData = await syncAndGetUser(user.uid, user.email || "");
-        const isAdmin = user.uid === MASTER_ADMIN_UID || userData.roleId === "role_admin" || user.email?.toLowerCase().startsWith("firstoption");
-
-        if (isAdmin) {
-          router.replace(redirectTarget || "/crms");
-        } else {
-          router.replace("/management");
-        }
+        router.replace(redirectTarget || "/crms");
       } else {
         setCheckingAuth(false);
       }
@@ -43,16 +35,8 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
-      const res = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const { syncAndGetUser, MASTER_ADMIN_UID } = await import("@/lib/firebase");
-      const userData = await syncAndGetUser(res.user.uid, res.user.email || "");
-      const isAdmin = res.user.uid === MASTER_ADMIN_UID || userData.roleId === "role_admin" || res.user.email?.toLowerCase().startsWith("firstoption");
-
-      if (isAdmin) {
-        router.replace(redirectTarget || "/crms");
-      } else {
-        router.replace("/management");
-      }
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace(redirectTarget || "/crms");
     } catch (err: any) {
       if (
         err.code === "auth/invalid-credential" ||

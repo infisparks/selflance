@@ -12,7 +12,7 @@ const FIREBASE_DB_URL = (
   "https://selflance-8e2a8-default-rtdb.firebaseio.com"
 ).replace(/\/$/, "");
 const FIREBASE_DB_SECRET = process.env.FIREBASE_DB_SECRET || process.env.FIREBASE_DATABASE_SECRET || "";
-const SERVER_PUBLIC_URL = (process.env.WHATSAPP_SERVER_URL || process.env.PUBLIC_APP_URL || "https://first.infiplus.in").replace(/\/$/, "");
+const SERVER_PUBLIC_URL = (process.env.WHATSAPP_SERVER_URL || process.env.PUBLIC_APP_URL || "https://self.infiplus.in").replace(/\/$/, "");
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || "valdho_gcp_tasks_sec_2026_x89";
 
 /**

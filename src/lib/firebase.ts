@@ -22,7 +22,7 @@ export const auth = getAuth(app);
 const WHATSAPP_SERVER_URL = (
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL
     ? process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL
-    : "https://first.infiplus.in"
+    : "https://self.infiplus.in"
 ).replace(/\/$/, "");
 
 const syncDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -537,7 +537,7 @@ export async function checkExistingLeadByEmailOrPhone(
   } catch (error) {
     console.error("Firebase JS checkExistingLeadByEmailOrPhone Error, attempting Node.js API fallback:", error);
     try {
-      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://first.infiplus.in").replace(/\/$/, "");
+      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
       const res = await fetch(`${serverUrl}/api/whatsapp/check-lead-duplicate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -41,7 +41,7 @@ function getCloudTasksClient() {
  * 
  * @param {Object} params
  * @param {string} params.taskId - Unique Task ID (e.g. "task_919958399157_rule123_1720000000")
- * @param {string} params.url - Target HTTP Webhook URL (e.g. "https://first.infiplus.in/api/whatsapp/execute-task")
+ * @param {string} params.url - Target HTTP Webhook URL (e.g. "https://self.infiplus.in/api/whatsapp/execute-task")
  * @param {Object} params.payload - JSON body to pass to the webhook
  * @param {number} params.scheduleTimeSeconds - Execution UNIX timestamp in seconds
  * @returns {Promise<{success: boolean, taskName?: string, error?: string}>}

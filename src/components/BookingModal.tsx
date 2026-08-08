@@ -436,7 +436,7 @@ export function BookingModal({
         campaign: activeCampaign.id,
       });
 
-      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://first.infiplus.in").replace(/\/$/, "");
+      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
       fetch(`${serverUrl}/api/whatsapp/auto-send-welcome`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

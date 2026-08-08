@@ -56,7 +56,7 @@ interface WhatsappWorkflowConfig {
   step3Meeting: StepConfig;
 }
 
-const SERVER_URL = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://first.infiplus.in").replace(/\/$/, "");
+const SERVER_URL = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
 
 export default function WhatsappManagerPage() {
   const router = useRouter();
@@ -163,7 +163,7 @@ export default function WhatsappManagerPage() {
     return () => unsubscribe();
   }, []);
 
-  // Authenticate Admin
+  // Authenticate User (Assume Admin Access)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -172,17 +172,7 @@ export default function WhatsappManagerPage() {
         setCurrentUser(user);
         const profile = await syncAndGetUser(user.uid, user.email || "");
         setUserData(profile);
-
-        const isAdmin =
-          user.uid === MASTER_ADMIN_UID ||
-          profile?.roleId === "role_admin" ||
-          user.email?.toLowerCase().startsWith("firstoption");
-
-        if (!isAdmin) {
-          router.replace("/management");
-        } else {
-          setAuthLoading(false);
-        }
+        setAuthLoading(false);
       }
     });
     return () => unsubscribe();
@@ -529,20 +519,7 @@ export default function WhatsappManagerPage() {
     }
   };
 
-  // Handle Google OAuth 1-Click Redirect
-  const handleGoogleOAuthRedirect = async () => {
-    try {
-      const res = await fetch(`${SERVER_URL}/api/google/auth-url`);
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Unable to generate Google Sign-In URL.");
-      }
-    } catch (err: any) {
-      alert(`Google OAuth error: ${err.message}`);
-    }
-  };
+
 
   // Handle Send Message
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -993,24 +970,15 @@ export default function WhatsappManagerPage() {
 
             <div className="flex items-center space-x-2">
               <span className="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1.5 rounded-xl border border-slate-200">
-                {meetAccounts.length} Active
+                {meetAccounts.length} Configured Link(s)
               </span>
               <button
                 type="button"
-                onClick={handleGoogleOAuthRedirect}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
-                title="1-Click Connect Google OAuth"
-              >
-                <i className="fa-brands fa-google text-xs"></i>
-                <span>Sign in with Google ⚡</span>
-              </button>
-              <button
-                type="button"
                 onClick={() => setIsConnectMeetModalOpen(true)}
-                className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-9 h-9 rounded-xl font-bold flex items-center justify-center text-lg shadow-2xs transition-all cursor-pointer"
-                title="Manual Credentials Connect"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
+                title="Add Static Google Meet Link"
               >
-                +
+                <span>+ Add Meeting Link</span>
               </button>
             </div>
           </div>
@@ -1421,54 +1389,13 @@ export default function WhatsappManagerPage() {
                 />
               </div>
 
-              {/* Google OAuth Refresh Token for Auto Unique Links */}
-              <div className="pt-2 border-t border-slate-100 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-indigo-900 flex items-center space-x-1">
-                    <span>⚡ Google Calendar OAuth (Auto Unique Links)</span>
-                  </span>
-                  <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
-                    Optional
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500">
-                  Enter your Google Refresh Token below if you want Google Calendar API to automatically generate a brand-new, unique <code>meet.google.com</code> link for every booking!
-                </p>
-
-                <div className="space-y-2">
-                  <input
-                    type="password"
-                    placeholder="Google OAuth Refresh Token (Optional)"
-                    value={newMeetRefreshToken}
-                    onChange={(e) => setNewMeetRefreshToken(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                  />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Google Client ID"
-                      value={newMeetClientId}
-                      onChange={(e) => setNewMeetClientId(e.target.value)}
-                      className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-900 focus:outline-none"
-                    />
-                    <input
-                      type="password"
-                      placeholder="Google Client Secret"
-                      value={newMeetClientSecret}
-                      onChange={(e) => setNewMeetClientSecret(e.target.value)}
-                      className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-900 focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
               <div className="pt-2 flex items-center justify-end">
                 <button
                   type="submit"
                   disabled={isConnectingMeet}
                   className="bg-indigo-950 hover:bg-indigo-900 text-white text-xs font-extrabold px-6 py-2.5 rounded-xl shadow-md transition-all disabled:opacity-50 cursor-pointer"
                 >
-                  {isConnectingMeet ? "Connecting..." : "Connect Account"}
+                  {isConnectingMeet ? "Saving..." : "Save Meeting Link"}
                 </button>
               </div>
             </form>
