@@ -484,6 +484,21 @@ export function BookingModal({
     saveOrUpdateLead(surveyPayload, emailPrefixId, createdDate, activeCampaign.id).catch((err) =>
       console.error("Async survey save error:", err)
     );
+
+    // Trigger automated WhatsApp survey completion message
+    const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
+    const cleanPhone = contactInfo.phone.replace(/\D/g, "");
+    const fullPhoneNumber = `${contactInfo.countryCode}${cleanPhone}`;
+
+    fetch(`${serverUrl}/api/whatsapp/auto-send-survey`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: contactInfo.fullName,
+        email: contactInfo.email,
+        phone: fullPhoneNumber,
+      }),
+    }).catch((err) => console.error("Async WhatsApp Survey Confirmation Error:", err));
   };
 
   const handleReset = () => {

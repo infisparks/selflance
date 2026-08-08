@@ -1081,31 +1081,23 @@ router.post("/auto-send-meeting", async (req, res) => {
       .replace(/\{\{\s*meeting_link\s*\}\}/gi, resolvedMeetingUrl)
       .replace(/\{\{\s*link\s*\}\}/gi, resolvedMeetingUrl);
 
-    // Explicitly send WITHOUT card (plain text WhatsApp message) as requested by user
-    const sendWithCard = false;
+    const cleanNumber = sanitizePhoneNumber(phone);
+    console.log(`💬 [Auto Send Meeting] Dispatching meeting confirmation to ${cleanNumber} via active instance '${instanceName}'...`);
 
-    const { generateAndSendWhatsAppCard } = require("./id_card");
-    const cardResult = await generateAndSendWhatsAppCard({
-      phone,
-      fullName: fullName || "Valued Client",
-      email: email || "N/A",
-      date: date || "Upcoming Date",
-      time: time || "Scheduled Time",
-      meetingUrl: resolvedMeetingUrl,
-      customMessage: formattedMessage,
-      instanceName,
-      sendWithCard: false,
+    const evoRes = await evoApiCall(`/message/sendText/${instanceName}`, "POST", {
+      number: cleanNumber,
+      text: formattedMessage,
     });
 
     // Purge pending message queues from Step 1 (1st Connection) and Step 2 (Survey) when meeting is booked
     try {
       const { cancelAllLeadTasks, syncLeadAutomations } = require("./whatsapp_pipeline_stage_configuration");
-      await cancelAllLeadTasks(phone);
+      await cancelAllLeadTasks(cleanNumber);
       syncLeadAutomations(
         {
           fullName,
           email,
-          phone: sanitizePhoneNumber(phone),
+          phone: cleanNumber,
           pipelineStage: "meeting_booked",
           status: "completed",
           meeting: { meetingDate: date, meetingTime: time },
@@ -1119,7 +1111,7 @@ router.post("/auto-send-meeting", async (req, res) => {
     // Save resolved meeting URL & update CRM pipeline stage to meeting_booked in Firebase RTDB
     if (email || phone) {
       await updateLeadStageInFirebase({
-        phone,
+        phone: cleanNumber,
         email,
         pipelineStage: "meeting_booked",
         status: "completed",
@@ -1129,34 +1121,30 @@ router.post("/auto-send-meeting", async (req, res) => {
       });
     }
 
-    if (cardResult && cardResult.success) {
+    if (evoRes.ok) {
       await firebaseDb(`whatsapp_unofficial_instances/${instanceName}`, "PATCH", {
         status: "open",
         qrCode: null,
         updatedAt: new Date().toISOString(),
       });
       const logId = `auto_meeting_${Date.now()}`;
-      const cleanNumber = sanitizePhoneNumber(phone);
       await firebaseDb(`whatsapp_logs/${instanceName}/${logId}`, "PUT", {
         id: logId,
         type: "auto_meeting",
         number: cleanNumber,
+        text: formattedMessage,
         status: "sent",
-        sendWithCard,
         timestamp: new Date().toISOString(),
       });
+    } else {
+      console.error(`❌ [Auto Send Meeting] Evolution API send failed for ${cleanNumber}:`, evoRes.data);
     }
 
     return res.status(200).json({
-      success: cardResult?.success || false,
+      success: evoRes.ok,
       meetingUrl: resolvedMeetingUrl,
-      sendWithCard,
-      message: cardResult?.success
-        ? sendWithCard
-          ? "Meeting confirmation card image sent via WhatsApp"
-          : "Meeting confirmation text sent via WhatsApp"
-        : "WhatsApp send failed",
-      data: cardResult?.result || null,
+      message: evoRes.ok ? "Meeting confirmation text sent via WhatsApp" : "WhatsApp send failed",
+      data: evoRes.data || null,
     });
   } catch (err) {
     console.error("Auto Send Meeting Exception:", err);
