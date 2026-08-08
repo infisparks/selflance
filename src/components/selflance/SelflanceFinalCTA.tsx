@@ -85,8 +85,15 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
       <footer className="w-full border-t border-gray-800/80 bg-[#070B16] py-10 px-4 sm:px-6 relative z-10 text-center sm:text-left overflow-hidden">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <div className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-1">
-              Selflance<span className="text-[#df7626]">.</span>
+            <div className="flex items-center space-x-3 mb-1 justify-center sm:justify-start">
+              <img
+                src="/Selflance Logo.png"
+                alt="Selflance Logo"
+                className="h-8 sm:h-10 w-auto object-contain"
+              />
+              <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                Selflance<span className="text-[#df7626]">.</span>
+              </span>
             </div>
             <p className="text-[#818CF8] text-xs sm:text-sm font-semibold max-w-md">
               We Engineer Technology That Helps Businesses Scale Faster.
