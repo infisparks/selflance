@@ -1081,8 +1081,8 @@ router.post("/auto-send-meeting", async (req, res) => {
       .replace(/\{\{\s*meeting_link\s*\}\}/gi, resolvedMeetingUrl)
       .replace(/\{\{\s*link\s*\}\}/gi, resolvedMeetingUrl);
 
-    // Determine if WhatsApp message should be sent WITH CARD image or WITHOUT CARD text
-    const sendWithCard = stepConfig.sendWithCard !== false;
+    // Explicitly send WITHOUT card (plain text WhatsApp message) as requested by user
+    const sendWithCard = false;
 
     const { generateAndSendWhatsAppCard } = require("./id_card");
     const cardResult = await generateAndSendWhatsAppCard({
@@ -1094,7 +1094,7 @@ router.post("/auto-send-meeting", async (req, res) => {
       meetingUrl: resolvedMeetingUrl,
       customMessage: formattedMessage,
       instanceName,
-      sendWithCard,
+      sendWithCard: false,
     });
 
     // Purge pending message queues from Step 1 (1st Connection) and Step 2 (Survey) when meeting is booked
@@ -1116,12 +1116,12 @@ router.post("/auto-send-meeting", async (req, res) => {
       console.error("[Auto Send Meeting] Task queue purge exception:", err);
     }
 
-    // Save resolved meeting URL & update CRM pipeline stage to meeting_scheduled in Firebase RTDB
+    // Save resolved meeting URL & update CRM pipeline stage to meeting_booked in Firebase RTDB
     if (email || phone) {
       await updateLeadStageInFirebase({
         phone,
         email,
-        pipelineStage: "meeting_scheduled",
+        pipelineStage: "meeting_booked",
         status: "completed",
         meetingDate: date,
         meetingTime: time,

@@ -189,7 +189,21 @@ function isMeetingInPast(meetingDateStr?: string, timeStr?: string): boolean {
 }
 
 function getLeadEffectiveStage(lead: LeadData): string {
-  return lead.pipelineStage || "raw";
+  const stage = lead.pipelineStage;
+  if (stage === "meeting_booked" || stage === "meeting_scheduled") return "meeting_booked";
+  if (stage === "survey_completed") return "survey_completed";
+  if (stage && stage !== "raw" && stage !== "1st Connection" && stage !== "in_progress") return stage;
+
+  // Fallback: If lead has meeting details or status completed, map to meeting_booked column
+  if ((lead.meeting && (lead.meeting.meetingDate || lead.meeting.bookedAt)) || lead.status === "completed") {
+    return "meeting_booked";
+  }
+  // Fallback: If lead has survey answers or status survey_completed, map to survey_completed column
+  if ((lead.survey && Object.keys(lead.survey).length > 0) || lead.status === "survey_completed") {
+    return "survey_completed";
+  }
+
+  return stage || "raw";
 }
 
 export default function CRMPage() {

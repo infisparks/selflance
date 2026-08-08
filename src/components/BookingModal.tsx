@@ -556,7 +556,7 @@ export function BookingModal({
       phone: contactInfo.phone.replace(/\D/g, ""),
       countryCode: contactInfo.countryCode,
       status: "completed",
-      pipelineStage: "meeting_scheduled",
+      pipelineStage: "meeting_booked",
       stageMovedAt: new Date().toISOString(),
       survey: qAnswers,
       meeting: {
