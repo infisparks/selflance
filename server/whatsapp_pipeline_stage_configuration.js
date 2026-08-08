@@ -1131,7 +1131,84 @@ router.post("/check-lead-duplicate", async (req, res) => {
   }
 });
 
+/**
+ * REUSABLE BACKGROUND WORKER:
+ * Periodically processes custom scheduled WhatsApp broadcasts from `lead_whatapp_send_by_date`.
+ * Dispatches messages whose scheduledAt timestamp has arrived via Evolution API.
+ * Runs automatically every 15 seconds.
+ */
+async function processScheduledBroadcastsQueue() {
+  try {
+    const broadcastsNode = (await firebaseDb("lead_whatapp_send_by_date")) || {};
+    const nowMs = Date.now();
+
+    for (const [phoneKey, userBroadcastsMap] of Object.entries(broadcastsNode)) {
+      if (!userBroadcastsMap || typeof userBroadcastsMap !== "object") continue;
+
+      for (const [schId, record] of Object.entries(userBroadcastsMap)) {
+        if (!record || typeof record !== "object") continue;
+
+        const status = (record.status || "pending").toLowerCase();
+        if (status === "sent" || status === "failed_permanently") continue;
+
+        const scheduledAtMs = record.scheduledAt ? new Date(record.scheduledAt).getTime() : 0;
+        const effectiveTimeMs = scheduledAtMs || (record.scheduleTimeSeconds ? record.scheduleTimeSeconds * 1000 : 0);
+
+        if (effectiveTimeMs > 0 && effectiveTimeMs <= nowMs + 10000) {
+          console.log(`🚀 [Scheduled Broadcast Worker] Executing due broadcast '${schId}' for lead '${phoneKey}'...`);
+
+          // Atomically lock status to 'dispatching'
+          await firebaseDb(`lead_whatapp_send_by_date/${phoneKey}/${schId}/status`, "PUT", "dispatching");
+
+          const cleanPhone = sanitizePhoneNumber(phoneKey);
+          let targetInstance = record.instanceName;
+          if (!targetInstance) {
+            const config = (await firebaseDb("whatsapp_configuration/firstoptionagency")) || {};
+            targetInstance = config.selectedInstanceName;
+          }
+
+          if (!targetInstance) {
+            const fbInstances = (await firebaseDb("whatsapp_unofficial_instances")) || {};
+            const openInst = Object.values(fbInstances).find((i) => i && i.status === "open");
+            if (openInst) targetInstance = openInst.instanceName;
+          }
+
+          if (!targetInstance) {
+            console.warn(`⚠️ [Scheduled Broadcast Worker] No active WhatsApp instance available to dispatch broadcast '${schId}'.`);
+            continue;
+          }
+
+          const formattedMessage = record.messageText || record.text || "";
+          const evoRes = await evoApiCall(`/message/sendText/${targetInstance}`, "POST", {
+            number: cleanPhone,
+            text: formattedMessage,
+          });
+
+          if (evoRes.ok) {
+            console.log(`✅ [Scheduled Broadcast Worker] Successfully dispatched scheduled message '${schId}' to ${cleanPhone}!`);
+            await firebaseDb(`lead_whatapp_send_by_date/${phoneKey}/${schId}/status`, "PUT", "sent");
+            await firebaseDb(`lead_whatapp_send_by_date/${phoneKey}/${schId}/sentAt`, "PUT", new Date().toISOString());
+
+            if (record.taskId) {
+              await firebaseDb(`whatsapp_scheduled_tasks/${cleanPhone}/${record.taskId}`, "DELETE");
+            }
+          } else {
+            console.error(`❌ [Scheduled Broadcast Worker] Dispatch failed for '${schId}':`, evoRes.data);
+            await firebaseDb(`lead_whatapp_send_by_date/${phoneKey}/${schId}/status`, "PUT", "pending");
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("🔥 [Scheduled Broadcast Worker Exception]:", err);
+  }
+}
+
+// Start background broadcast dispatcher loop running every 15 seconds
+setInterval(processScheduledBroadcastsQueue, 15000);
+
 module.exports = router;
 module.exports.syncLeadAutomations = syncLeadAutomations;
 module.exports.cancelAllLeadTasks = cancelAllLeadTasks;
+module.exports.processScheduledBroadcastsQueue = processScheduledBroadcastsQueue;
 

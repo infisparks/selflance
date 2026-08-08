@@ -217,65 +217,73 @@ async function listScheduledTasksFromFirebase() {
 
 async function listScheduledTasks() {
   try {
+    const client = getCloudTasksClient();
+    if (!client) {
+      return await listScheduledTasksFromFirebase();
+    }
+
     const projectId = process.env.GCP_PROJECT_ID || "firstoption-8da25";
     const location = process.env.GCP_LOCATION || "asia-south1";
     const queueName = process.env.GCP_QUEUE_NAME || "whatsapp-automation-queue";
 
-    // Fast timeout promise (3 seconds) to prevent UI modal from hanging
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("GCP Cloud Tasks connection timeout")), 3000)
-    );
-
-    const client = getCloudTasksClient();
-    const parent = client.queuePath(projectId, location, queueName);
-
-    const [tasks] = await Promise.race([
-      client.listTasks({ parent, responseView: "FULL" }),
-      timeoutPromise,
-    ]);
-
-    const formattedTasks = tasks.map((task) => {
-      let payload = {};
-      try {
-        if (task.httpRequest && task.httpRequest.body) {
-          let rawBody = task.httpRequest.body;
-          if (Buffer.isBuffer(rawBody)) {
-            rawBody = rawBody.toString("utf-8");
-          } else if (typeof rawBody === "string") {
-            try {
-              const decoded = Buffer.from(rawBody, "base64").toString("utf-8");
-              if (decoded.startsWith("{")) rawBody = decoded;
-            } catch (e) {}
-          }
-          payload = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
-        }
-      } catch (e) {}
-
-      const rawTaskId = payload.taskId || task.name.split("/").pop() || "";
-
-      let extractedPhone = payload.leadPhone;
-      if (!extractedPhone && rawTaskId.startsWith("task_")) {
-        const parts = rawTaskId.split("_");
-        if (parts.length >= 2 && parts[1].length >= 10) {
-          extractedPhone = "+" + parts[1];
-        }
-      }
-
-      return {
-        name: task.name,
-        taskId: rawTaskId,
-        scheduleTimeSeconds: task.scheduleTime ? parseInt(task.scheduleTime.seconds, 10) : 0,
-        leadPhone: extractedPhone || payload.leadPhone || "Unknown Phone",
-        ruleTitle: payload.ruleTitle || (rawTaskId.includes("fallback") ? "Auto Funnel Welcome" : "Stage Automation Rule"),
-        stageId: payload.stageId || "Active Pipeline Stage",
-        payload: payload,
-      };
+    let timerId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timerId = setTimeout(() => reject(new Error("GCP Cloud Tasks connection timeout")), 3000);
     });
 
-    formattedTasks.sort((a, b) => a.scheduleTimeSeconds - b.scheduleTimeSeconds);
-    return { success: true, tasks: formattedTasks, source: "gcp" };
+    try {
+      const parent = client.queuePath(projectId, location, queueName);
+      const [tasks] = await Promise.race([
+        client.listTasks({ parent, responseView: "FULL" }),
+        timeoutPromise,
+      ]);
+      clearTimeout(timerId);
+
+      const formattedTasks = tasks.map((task) => {
+        let payload = {};
+        try {
+          if (task.httpRequest && task.httpRequest.body) {
+            let rawBody = task.httpRequest.body;
+            if (Buffer.isBuffer(rawBody)) {
+              rawBody = rawBody.toString("utf-8");
+            } else if (typeof rawBody === "string") {
+              try {
+                const decoded = Buffer.from(rawBody, "base64").toString("utf-8");
+                if (decoded.startsWith("{")) rawBody = decoded;
+              } catch (e) {}
+            }
+            payload = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
+          }
+        } catch (e) {}
+
+        const rawTaskId = payload.taskId || task.name.split("/").pop() || "";
+
+        let extractedPhone = payload.leadPhone;
+        if (!extractedPhone && rawTaskId.startsWith("task_")) {
+          const parts = rawTaskId.split("_");
+          if (parts.length >= 2 && parts[1].length >= 10) {
+            extractedPhone = "+" + parts[1];
+          }
+        }
+
+        return {
+          name: task.name,
+          taskId: rawTaskId,
+          scheduleTimeSeconds: task.scheduleTime ? parseInt(task.scheduleTime.seconds, 10) : 0,
+          leadPhone: extractedPhone || payload.leadPhone || "Unknown Phone",
+          ruleTitle: payload.ruleTitle || (rawTaskId.includes("fallback") ? "Auto Funnel Welcome" : "Stage Automation Rule"),
+          stageId: payload.stageId || "Active Pipeline Stage",
+          payload: payload,
+        };
+      });
+
+      formattedTasks.sort((a, b) => a.scheduleTimeSeconds - b.scheduleTimeSeconds);
+      return { success: true, tasks: formattedTasks, source: "gcp" };
+    } catch (gcpErr) {
+      clearTimeout(timerId);
+      throw gcpErr;
+    }
   } catch (err) {
-    console.warn(`[Cloud Tasks ℹ️] GCP Queue fetch timeout/unavailable (${err.message}). Reading scheduled queue from Firebase RTDB...`);
     return await listScheduledTasksFromFirebase();
   }
 }
