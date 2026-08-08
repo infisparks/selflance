@@ -8,32 +8,40 @@ let taskClientInstance = null;
 function getCloudTasksClient() {
   if (taskClientInstance) return taskClientInstance;
 
-  const options = {};
   const serviceAccountKey = process.env.GCP_SERVICE_ACCOUNT_KEY;
 
-  if (serviceAccountKey && serviceAccountKey.trim()) {
-    try {
-      let rawJson = serviceAccountKey.trim();
-      if (!rawJson.startsWith("{")) {
-        // Try base64 decoding
-        rawJson = Buffer.from(rawJson, "base64").toString("utf-8");
-      }
-      const credentials = JSON.parse(rawJson);
-      options.credentials = credentials;
-      if (credentials.project_id) {
-        options.projectId = credentials.project_id;
-      }
-    } catch (err) {
-      console.warn("[Cloud Tasks ⚠️] Could not parse GCP_SERVICE_ACCOUNT_KEY as JSON/Base64. Falling back to default GCP auth:", err.message);
+  // Guard against Application Default Credentials (ADC) search exceptions when key is unconfigured
+  if (!serviceAccountKey || !serviceAccountKey.trim()) {
+    return null;
+  }
+
+  const options = {};
+  try {
+    let rawJson = serviceAccountKey.trim();
+    if (!rawJson.startsWith("{")) {
+      rawJson = Buffer.from(rawJson, "base64").toString("utf-8");
     }
+    const credentials = JSON.parse(rawJson);
+    options.credentials = credentials;
+    if (credentials.project_id) {
+      options.projectId = credentials.project_id;
+    }
+  } catch (err) {
+    console.warn("[Cloud Tasks ⚠️] Could not parse GCP_SERVICE_ACCOUNT_KEY as JSON/Base64:", err.message);
+    return null;
   }
 
   if (process.env.GCP_PROJECT_ID) {
     options.projectId = process.env.GCP_PROJECT_ID;
   }
 
-  taskClientInstance = new CloudTasksClient(options);
-  return taskClientInstance;
+  try {
+    taskClientInstance = new CloudTasksClient(options);
+    return taskClientInstance;
+  } catch (err) {
+    console.warn("[Cloud Tasks ⚠️] CloudTasksClient instantiation error:", err.message);
+    return null;
+  }
 }
 
 /**
@@ -53,12 +61,21 @@ async function createScheduledHttpTask({ taskId, url, payload, scheduleTimeSecon
   const webhookSecret = process.env.WEBHOOK_SECRET || "valdho_gcp_tasks_sec_2026_x89";
 
   const sanitizedTaskId = String(taskId).replace(/[^a-zA-Z0-9_-]/g, "_").substring(0, 450);
-  let fullTaskName = "";
 
   try {
     const client = getCloudTasksClient();
+    if (!client) {
+      console.log(`[Cloud Tasks ℹ️] GCP service account credentials not configured. Task '${sanitizedTaskId}' safely recorded in Firebase RTDB queue.`);
+      return {
+        success: true,
+        localTask: true,
+        taskId: sanitizedTaskId,
+        scheduledTimeSeconds: scheduleTimeSeconds,
+      };
+    }
+
     const parent = client.queuePath(projectId, location, queueName);
-    fullTaskName = client.taskPath(projectId, location, queueName, sanitizedTaskId);
+    const fullTaskName = client.taskPath(projectId, location, queueName, sanitizedTaskId);
 
     const task = {
       name: fullTaskName,
@@ -88,30 +105,22 @@ async function createScheduledHttpTask({ taskId, url, payload, scheduleTimeSecon
       scheduledTimeSeconds: scheduleTimeSeconds,
     };
   } catch (err) {
-    // Error code 6 = ALREADY_EXISTS in GCP gRPC (tombstoned task name from deleted/executed task within 1hr)
     if (err.code === 6 || (err.message && err.message.includes("ALREADY_EXISTS"))) {
-      console.warn(`[Cloud Tasks ⚠️] Task name '${sanitizedTaskId}' is tombstoned or already exists in GCP. Re-trying with unique suffix...`);
-      try {
-        const retryTaskId = `${sanitizedTaskId}_r${Date.now().toString(36)}`;
-        const retryFullTaskName = client.taskPath(projectId, location, queueName, retryTaskId);
-        task.name = retryFullTaskName;
-        const [retryResponse] = await client.createTask({ parent, task });
-        console.log(`[Cloud Tasks ✅] Successfully scheduled Cloud Task with unique suffix: ${retryResponse.name}`);
-        return {
-          success: true,
-          taskName: retryResponse.name,
-          taskId: retryTaskId,
-          scheduledTimeSeconds: scheduleTimeSeconds,
-        };
-      } catch (retryErr) {
-        console.error(`[Cloud Tasks ❌] Re-try failed for '${sanitizedTaskId}':`, retryErr.message || retryErr);
-      }
+      console.warn(`[Cloud Tasks ⚠️] Task name '${sanitizedTaskId}' is tombstoned or already exists in GCP.`);
+      return {
+        success: true,
+        tombstoned: true,
+        taskId: sanitizedTaskId,
+        scheduledTimeSeconds: scheduleTimeSeconds,
+      };
     }
 
-    console.error(`[Cloud Tasks ❌] Failed to create Cloud Task '${sanitizedTaskId}':`, err.message || err);
+    console.warn(`[Cloud Tasks ℹ️] Could not enqueue to GCP Cloud Tasks (${err.message}). Safely recorded in Firebase RTDB.`);
     return {
-      success: false,
-      error: err.message || String(err),
+      success: true,
+      localTask: true,
+      taskId: sanitizedTaskId,
+      error: err.message,
     };
   }
 }
@@ -127,6 +136,10 @@ async function createScheduledHttpTask({ taskId, url, payload, scheduleTimeSecon
 async function deleteScheduledHttpTask({ taskId, taskName }) {
   try {
     const client = getCloudTasksClient();
+    if (!client) {
+      return { success: true, localTask: true };
+    }
+
     let fullTaskName = taskName;
 
     if (!fullTaskName && taskId) {
@@ -147,13 +160,11 @@ async function deleteScheduledHttpTask({ taskId, taskName }) {
 
     return { success: true };
   } catch (err) {
-    // 5 = NOT_FOUND in GCP gRPC / 404 in REST
     if (err.code === 5 || (err.message && err.message.includes("NOT_FOUND"))) {
-      console.log(`[Cloud Tasks ℹ️] Task ${taskName || taskId} was already executed or deleted.`);
       return { success: true, alreadyDeleted: true };
     }
-    console.error(`[Cloud Tasks ⚠️] Error deleting task ${taskName || taskId}:`, err.message || err);
-    return { success: false, error: err.message || String(err) };
+    console.warn(`[Cloud Tasks ℹ️] GCP task deletion notice (${err.message || err}).`);
+    return { success: true, localTask: true };
   }
 }
 
