@@ -234,7 +234,10 @@ export function BookingModal({
       }
 
       if (foundContact && !isReselectingSlot) {
-        if (hasMeeting || leadStatus === "completed") {
+        if (initialStep === 2) {
+          setShowAlreadySubmittedPopup(false);
+          setStep(2);
+        } else if (hasMeeting || leadStatus === "completed") {
           if (initialStep === 1) {
             setShowAlreadySubmittedPopup(true);
           } else if (initialStep === 3 || initialStep === 4) {

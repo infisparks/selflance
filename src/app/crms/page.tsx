@@ -190,18 +190,43 @@ function isMeetingInPast(meetingDateStr?: string, timeStr?: string): boolean {
 
 function getLeadEffectiveStage(lead: LeadData): string {
   const stage = lead.pipelineStage;
-  if (stage === "meeting_booked" || stage === "meeting_scheduled") return "meeting_booked";
-  if (stage === "survey_completed") return "survey_completed";
-  if (stage && stage !== "raw" && stage !== "1st Connection" && stage !== "in_progress") return stage;
 
-  // Fallback: If lead has meeting details or status completed, map to meeting_booked column
-  if ((lead.meeting && (lead.meeting.meetingDate || lead.meeting.bookedAt)) || lead.status === "completed") {
+  // Preserve manual downstream sales stages (proposal_sent, won, not_qualified) and custom stages
+  const isDownstreamOrCustom =
+    stage &&
+    stage !== "raw" &&
+    stage !== "1st Connection" &&
+    stage !== "in_progress" &&
+    stage !== "survey_completed" &&
+    stage !== "meeting_booked" &&
+    stage !== "meeting_scheduled";
+
+  if (isDownstreamOrCustom) {
+    if (stage === "closed_won") return "won";
+    if (stage === "disqualified" || stage === "lost") return "not_qualified";
+    return stage;
+  }
+
+  // Dynamic Funnel Resolution for Meeting Booked
+  if (
+    stage === "meeting_booked" ||
+    stage === "meeting_scheduled" ||
+    (lead.meeting && (lead.meeting.meetingDate || lead.meeting.bookedAt || lead.meeting.meetingTime)) ||
+    lead.status === "completed"
+  ) {
     return "meeting_booked";
   }
-  // Fallback: If lead has survey answers or status survey_completed, map to survey_completed column
-  if ((lead.survey && Object.keys(lead.survey).length > 0) || lead.status === "survey_completed") {
+
+  // Dynamic Funnel Resolution for Survey Completed
+  if (
+    stage === "survey_completed" ||
+    (lead.survey && Object.keys(lead.survey).length > 0) ||
+    lead.status === "survey_completed"
+  ) {
     return "survey_completed";
   }
+
+  if (stage === "1st Connection") return "in_progress";
 
   return stage || "raw";
 }

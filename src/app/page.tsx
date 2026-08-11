@@ -8,6 +8,7 @@ import { SelflanceHero } from "@/components/selflance/SelflanceHero";
 import { GrowthBottleneckSection } from "@/components/selflance/GrowthBottleneckSection";
 import { GrowthPartnerSection } from "@/components/selflance/GrowthPartnerSection";
 import { WhatWeBuildSection } from "@/components/selflance/WhatWeBuildSection";
+import { PortfolioShowcaseSection } from "@/components/selflance/PortfolioShowcaseSection";
 import { SituationCheckSection } from "@/components/selflance/SituationCheckSection";
 import { TargetAudienceSection } from "@/components/selflance/TargetAudienceSection";
 import { DeliverablesSection } from "@/components/selflance/DeliverablesSection";
@@ -244,6 +245,9 @@ export default function Home({
 
       {/* Section 4: What We Build */}
       <WhatWeBuildSection />
+
+      {/* Section 4.5: Featured Portfolio & Design Showcase */}
+      <PortfolioShowcaseSection />
 
       {/* Section 5: Company Situation Check */}
       <SituationCheckSection isUS={isUS} />

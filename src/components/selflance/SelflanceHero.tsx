@@ -81,7 +81,7 @@ export function SelflanceHero({ isUS = false, onBookClick, onVideoClick }: Selfl
   }, [testimonials.length]);
 
   return (
-    <main className="w-full max-w-5xl mx-auto min-h-screen pt-[58px] sm:pt-[80px] pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3 overflow-hidden">
+    <main className="w-full max-w-5xl mx-auto min-h-screen pt-20 sm:pt-24 md:pt-28 pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3 overflow-hidden">
       {/* Ambient glows */}
       <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] bg-blue-900/20 blur-[90px] rounded-full pointer-events-none -z-10"></div>
       <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[220px] h-[220px] bg-purple-500/10 blur-[80px] rounded-full pointer-events-none -z-10 animate-[float_8s_ease-in-out_infinite]"></div>

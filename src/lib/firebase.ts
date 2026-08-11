@@ -424,26 +424,45 @@ export async function getLeadById(
 }
 
 /**
- * Search for an existing lead across dates or under a specific createdDate
+ * Search for an existing lead across dates or under a specific createdDate.
+ * Enhanced to search by leadId, sanitized email prefix (sanitizeEmailToId), email, or phone number.
  */
 export async function findExistingLead(
   leadId: string,
   createdDate?: string | null,
-  campaignName: string = "firstoptionagency"
+  campaignName: string = "firstoptionagency",
+  extraSearch?: { email?: string; phone?: string } | null
 ): Promise<{ lead: LeadData; createdDate: string } | null> {
   try {
+    const cleanLeadId = (leadId || "").trim();
+    const cleanEmail = (extraSearch?.email || (cleanLeadId.includes("@") ? cleanLeadId : "")).trim().toLowerCase();
+    const cleanPhone = (extraSearch?.phone || (cleanLeadId && /^\+?[0-9]{7,15}$/.test(cleanLeadId) ? cleanLeadId : "")).replace(/\D/g, "");
+    const emailSanitizedId = cleanEmail ? sanitizeEmailToId(cleanEmail) : (cleanLeadId ? sanitizeEmailToId(cleanLeadId) : "");
+
     if (createdDate) {
-      const directLead = await getLeadById(leadId, createdDate, campaignName);
+      const directLead = await getLeadById(cleanLeadId, createdDate, campaignName);
       if (directLead) {
         return { lead: directLead, createdDate };
+      }
+      if (emailSanitizedId && emailSanitizedId !== cleanLeadId) {
+        const emailLead = await getLeadById(emailSanitizedId, createdDate, campaignName);
+        if (emailLead) {
+          return { lead: emailLead, createdDate };
+        }
       }
     }
 
     const todayStr = new Date().toISOString().split("T")[0];
     if (createdDate !== todayStr) {
-      const todayLead = await getLeadById(leadId, todayStr, campaignName);
+      const todayLead = await getLeadById(cleanLeadId, todayStr, campaignName);
       if (todayLead) {
         return { lead: todayLead, createdDate: todayStr };
+      }
+      if (emailSanitizedId && emailSanitizedId !== cleanLeadId) {
+        const todayEmailLead = await getLeadById(emailSanitizedId, todayStr, campaignName);
+        if (todayEmailLead) {
+          return { lead: todayEmailLead, createdDate: todayStr };
+        }
       }
     }
 
@@ -453,11 +472,49 @@ export async function findExistingLead(
       const allDatesObj = snapshot.val();
       const dateKeys = Object.keys(allDatesObj).sort().reverse();
       for (const dKey of dateKeys) {
-        if (allDatesObj[dKey] && allDatesObj[dKey][leadId]) {
+        const dayLeads = allDatesObj[dKey];
+        if (!dayLeads) continue;
+
+        // 1. Direct key matches
+        if (cleanLeadId && dayLeads[cleanLeadId]) {
           return {
-            lead: allDatesObj[dKey][leadId] as LeadData,
+            lead: dayLeads[cleanLeadId] as LeadData,
             createdDate: dKey,
           };
+        }
+        if (emailSanitizedId && dayLeads[emailSanitizedId]) {
+          return {
+            lead: dayLeads[emailSanitizedId] as LeadData,
+            createdDate: dKey,
+          };
+        }
+
+        // 2. Iterate all leads in this date node to match by leadId, email, sanitized email, or phone
+        for (const lKey of Object.keys(dayLeads)) {
+          const l = dayLeads[lKey] as LeadData;
+          if (!l) continue;
+
+          const lId = (l.id || lKey || "").trim();
+          const lEmail = (l.email || "").trim().toLowerCase();
+          const lPhone = (l.phone || "").replace(/\D/g, "");
+          const lSanitized = lEmail ? sanitizeEmailToId(lEmail) : "";
+
+          const isIdMatch = cleanLeadId && (lId === cleanLeadId || lKey === cleanLeadId);
+          const isSanitizedMatch = emailSanitizedId && (lSanitized === emailSanitizedId || lKey === emailSanitizedId || lId === emailSanitizedId);
+          const isEmailMatch = cleanEmail && lEmail && lEmail === cleanEmail;
+          const isPhoneMatch =
+            cleanPhone &&
+            cleanPhone.length >= 7 &&
+            lPhone &&
+            (lPhone === cleanPhone ||
+              (lPhone.length >= 10 && cleanPhone.length >= 10 && lPhone.slice(-10) === cleanPhone.slice(-10)));
+
+          if (isIdMatch || isSanitizedMatch || isEmailMatch || isPhoneMatch) {
+            return {
+              lead: l,
+              createdDate: dKey,
+            };
+          }
         }
       }
     }
@@ -699,7 +756,10 @@ export async function saveOrUpdateLead(
     const leadId = existingLeadId || (lead.email ? sanitizeEmailToId(lead.email) : "lead_" + Date.now());
 
     // Search for existing lead record to avoid overwriting previously submitted survey/meeting details
-    const existingMatch = await findExistingLead(leadId, existingCreatedDate, campaignName);
+    const existingMatch = await findExistingLead(leadId, existingCreatedDate, campaignName, {
+      email: lead.email,
+      phone: lead.phone,
+    });
     const existingLead = existingMatch?.lead || null;
     const createdDate = existingMatch?.createdDate || existingCreatedDate || lead.createdDate || todayStr;
 
@@ -727,30 +787,81 @@ export async function saveOrUpdateLead(
     // Merge meeting data: use new meeting if user selected/re-selected a slot (lead.meeting), otherwise keep existing meeting
     const mergedMeeting = lead.meeting || existingLead?.meeting;
 
-    // Stage Progression Helper: Ensure pipelineStage advances when higher stage priority is reached
-    const getStagePriority = (stg?: string) => {
-      if (!stg) return 0;
-      if (stg === "won" || stg === "closed_won") return 5;
-      if (stg === "meeting_scheduled" || stg === "meeting_booked") return 4;
-      if (stg === "survey_completed") return 3;
-      if (stg === "qualified" || stg === "followup") return 2;
-      if (stg === "raw" || stg === "1st Connection") return 1;
-      return 1;
+    // Automated Funnel Stage Progression Weights:
+    // raw (1) -> in_progress (2) -> survey_completed (3) -> meeting_booked (4) -> proposal_sent (5) -> won (6) -> not_qualified (7)
+    const STAGE_WEIGHTS: Record<string, number> = {
+      raw: 1,
+      "1st Connection": 2,
+      in_progress: 2,
+      survey_completed: 3,
+      meeting_booked: 4,
+      meeting_scheduled: 4,
+      proposal_sent: 5,
+      won: 6,
+      closed_won: 6,
+      not_qualified: 7,
+      disqualified: 7,
+      lost: 7,
     };
 
-    const existingStagePriority = getStagePriority(existingLead?.pipelineStage);
-    const newStagePriority = getStagePriority(lead.pipelineStage);
+    const getStageWeight = (stg?: string) => {
+      if (!stg) return 0;
+      return STAGE_WEIGHTS[stg] || 0;
+    };
 
-    // Advance to new pipeline stage if new stage priority is higher or equal to existing stage
-    const mergedPipelineStage =
-      newStagePriority >= existingStagePriority
-        ? (lead.pipelineStage || existingLead?.pipelineStage || "raw")
-        : (existingLead?.pipelineStage || lead.pipelineStage || "raw");
+    const existingStage = existingLead?.pipelineStage;
+    const existingStageWeight = getStageWeight(existingStage);
 
-    const mergedStageMovedAt =
-      mergedPipelineStage !== existingLead?.pipelineStage
-        ? (lead.stageMovedAt || timestamp)
-        : (existingLead?.stageMovedAt || timestamp);
+    // Identify if existing lead is already in a downstream manual sales stage (proposal_sent (5), won (6), not_qualified (7))
+    const isDownstreamManualStage = existingStageWeight >= 5;
+
+    const hasSurveyData =
+      (mergedSurvey && Object.keys(mergedSurvey).length > 0) ||
+      finalStatus === "survey_completed" ||
+      lead.status === "survey_completed" ||
+      lead.pipelineStage === "survey_completed";
+
+    const hasMeetingData =
+      (mergedMeeting && (mergedMeeting.meetingDate || mergedMeeting.bookedAt)) ||
+      finalStatus === "completed" ||
+      lead.status === "completed" ||
+      lead.pipelineStage === "meeting_booked" ||
+      lead.pipelineStage === "meeting_scheduled";
+
+    let targetStage: string;
+
+    if (isDownstreamManualStage) {
+      // Preserve downstream sales stages if set manually by staff in CRM, unless explicitly updated to another manual stage
+      const incomingWeight = getStageWeight(lead.pipelineStage);
+      if (incomingWeight >= 5) {
+        targetStage = lead.pipelineStage!;
+      } else {
+        targetStage = existingStage!;
+      }
+    } else {
+      // Automated funnel progression:
+      if (hasMeetingData) {
+        // Automatically advance to "meeting_booked" if currently in raw, in_progress, or survey_completed
+        targetStage = "meeting_booked";
+      } else if (hasSurveyData) {
+        // Automatically advance to "survey_completed" if currently in raw or in_progress
+        targetStage = "survey_completed";
+      } else {
+        // Step 1 / Contact Form submission or raw lead
+        const incomingWeight = getStageWeight(lead.pipelineStage);
+        if (incomingWeight >= existingStageWeight) {
+          targetStage = lead.pipelineStage || existingStage || "in_progress";
+        } else {
+          targetStage = existingStage || lead.pipelineStage || "raw";
+        }
+      }
+    }
+
+    const mergedPipelineStage = targetStage;
+    const isStageChanged = !existingLead || mergedPipelineStage !== existingLead.pipelineStage;
+    const mergedStageMovedAt = isStageChanged
+      ? (lead.stageMovedAt || timestamp)
+      : (existingLead?.stageMovedAt || lead.stageMovedAt || timestamp);
     const mergedNotes = lead.notes || existingLead?.notes;
     const mergedFollowUpDate = lead.followUpDate || existingLead?.followUpDate;
     const mergedDealValue = lead.dealValue !== undefined ? lead.dealValue : existingLead?.dealValue;

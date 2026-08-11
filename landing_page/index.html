@@ -58,7 +58,7 @@
 
     <!-- FIXED HEADER -->
     <div class="fixed top-0 inset-x-0 z-50 flex justify-center">
-        <header class="w-full flex items-center justify-between px-4 py-2.5 sm:px-6 sm:py-4 bg-[#0B1121]/90 backdrop-blur-md border-b border-gray-800/50 max-w-5xl mx-auto">
+        <header class="w-full flex items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3 bg-[#0B1121]/90 backdrop-blur-md border-b border-gray-800/50 max-w-5xl mx-auto">
             <div class="text-[20px] sm:text-2xl font-extrabold text-white tracking-tight cursor-pointer">
                 Selflance<span class="text-brand-orange">.</span>
             </div>
@@ -67,7 +67,7 @@
     </div>
 
     <!-- MAIN HERO -->
-    <main class="w-full max-w-5xl mx-auto min-h-screen pt-[58px] sm:pt-[80px] pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3 overflow-hidden">
+    <main class="w-full max-w-5xl mx-auto min-h-screen pt-20 sm:pt-24 md:pt-28 pb-6 sm:pb-12 relative px-4 sm:px-6 z-10 flex flex-col justify-start items-center text-center gap-y-2 sm:gap-y-3 overflow-hidden">
 
         <!-- Ambient glows -->
         <div class="absolute top-[20%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] bg-blue-900/20 blur-[90px] rounded-full pointer-events-none -z-10"></div>
@@ -635,6 +635,206 @@
 
             </div>
 
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 4.5: FEATURED PORTFOLIO & DESIGN SHOWCASE
+    ══════════════════════════════════════ -->
+    <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10 overflow-hidden" id="portfolio-section">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[540px] h-[320px] sm:h-[540px] bg-[#6366F1]/15 blur-[110px] rounded-full pointer-events-none -z-10"></div>
+
+        <div class="bg-[#0F1629]/90 border border-[#2A3552]/80 rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            <!-- Header with badge & controls -->
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-10">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-full px-3 py-1 text-[#818CF8] text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3">
+                        <span class="w-2 h-2 rounded-full bg-[#6366F1] animate-ping"></span>
+                        Featured Case Studies &amp; Portfolio
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight">
+                        Crafted for <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#6366F1] via-[#A855F7] to-[#df7626]">Impact &amp; Scale</span>
+                    </h2>
+                    <p class="text-gray-400 text-xs sm:text-sm md:text-base mt-2 max-w-xl">
+                        Explore our comprehensive brand systems, custom digital products, and high-conversion UI/UX engineered for modern brands.
+                    </p>
+                </div>
+
+                <!-- Desktop & Mobile Quick Controls -->
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                    <a href="https://www.behance.net/selflance" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-300 hover:text-white bg-[#1A233D] hover:bg-[#253256] border border-[#2A3552] rounded-xl px-3 py-2 transition-colors mr-2">
+                        <svg class="w-3.5 h-3.5 text-[#0057ff]" viewBox="0 0 24 24" fill="currentColor"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-4.726 3-3.268 0-5.5-2.264-5.5-5.547 0-3.175 2.148-5.453 5.385-5.453 3.418 0 5.115 2.457 4.796 6H16.5c.075 1.579 1.157 2.41 2.593 2.41 1.094 0 1.942-.486 2.308-1.41h2.325zM16.5 12h4.555c-.092-1.309-.906-2.148-2.222-2.148-1.391 0-2.227.876-2.333 2.148zM8.594 13.602c.983-.45 1.623-1.353 1.623-2.524 0-2.454-1.849-3.078-4.217-3.078H0v12h6.183c2.569 0 4.636-.889 4.636-3.619 0-1.332-.782-2.368-2.225-2.779zM3 10h2.72c1.077 0 1.938.257 1.938 1.408 0 1.055-.861 1.392-1.938 1.392H3V10zm3.036 7.2H3V14.4h3.036c1.231 0 2.215.352 2.215 1.455 0 1.096-.984 1.345-2.215 1.345z"/></svg>
+                        <span>Behance Profile</span>
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                    <button id="portfolio-prev-btn" aria-label="Previous slide" class="w-8 h-8 rounded-lg bg-[#121A2F] border border-[#2A3552] flex items-center justify-center text-gray-300 hover:text-white hover:border-[#6366F1] transition-all cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button id="portfolio-next-btn" aria-label="Next slide" class="w-8 h-8 rounded-lg bg-[#121A2F] border border-[#2A3552] flex items-center justify-center text-gray-300 hover:text-white hover:border-[#6366F1] transition-all cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARDS DISPLAY:
+                - Mobile: Slidable touch-friendly carousel (compact height & width)
+                - Tablet & Desktop (md+): 2-column luxury grid
+            -->
+            <div id="portfolio-slider" class="flex md:grid md:grid-cols-2 gap-3.5 sm:gap-6 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none pb-3 md:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0" style="scrollbar-width: none; -ms-overflow-style: none;">
+                
+                <!-- Card 1: Logo Design -->
+                <div class="portfolio-card w-[78vw] max-w-[280px] sm:w-[320px] sm:max-w-[340px] md:w-auto md:max-w-none snap-center shrink-0 flex flex-col justify-between bg-[#0B1121]/90 hover:bg-[#121A2F] border border-[#2A3552]/80 hover:border-[#6366F1]/60 rounded-2xl p-3 sm:p-4 md:p-5 transition-all duration-300 group shadow-lg hover:shadow-[0_10px_30px_rgba(99,102,241,0.15)]">
+                    <div>
+                        <div class="relative w-full h-36 sm:h-44 md:h-52 lg:h-56 rounded-xl overflow-hidden bg-[#0A0F1C] border border-[#2A3552]/60 mb-3 sm:mb-4 group-hover:border-[#6366F1]/40 transition-colors">
+                            <img src="/profile/Logo Design.png" alt="Distinctive Logo Design" loading="lazy" class="w-full h-full object-cover object-top sm:object-center transform group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0B1121] via-transparent to-black/20 opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                            <div class="absolute top-2 left-2 z-10">
+                                <span class="inline-flex items-center text-[9px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border backdrop-blur-md text-[#df7626] bg-[#df7626]/10 border-[#df7626]/20">
+                                    Logo Design
+                                </span>
+                            </div>
+                            <a href="https://www.behance.net/gallery/247700045/Selflance-Brand-Identity-Logo-Design" target="_blank" rel="noopener noreferrer" class="absolute top-2 right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-[#0057ff] backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all transform hover:scale-110" aria-label="Open Logo Design on Behance">
+                                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                            <div class="absolute bottom-1.5 left-2 z-10 text-[8px] sm:text-[9px] text-gray-300 font-medium bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/10">
+                                Vector System • Brand Mark
+                            </div>
+                        </div>
+                        <h3 class="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-[#818CF8] transition-colors leading-snug">
+                            Distinctive Logo Design
+                        </h3>
+                        <p class="text-gray-300/90 text-xs sm:text-[13px] leading-relaxed mt-1.5 line-clamp-2 sm:line-clamp-3">
+                            Create a lasting first impression. We design unique, memorable logos that distill your brand's essence and stand out in the crowded marketplace.
+                        </p>
+                    </div>
+                    <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#2A3552]/60">
+                        <a href="https://www.behance.net/gallery/247700045/Selflance-Brand-Identity-Logo-Design" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1E293B]/90 hover:bg-[#6366F1] text-white hover:text-white border border-[#334155] hover:border-[#6366F1] font-semibold text-xs sm:text-sm py-2 sm:py-2.5 px-3 rounded-xl transition-all duration-300 shadow-sm group/btn">
+                            <span>View Logo Design</span>
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 2: Brand Identity -->
+                <div class="portfolio-card w-[78vw] max-w-[280px] sm:w-[320px] sm:max-w-[340px] md:w-auto md:max-w-none snap-center shrink-0 flex flex-col justify-between bg-[#0B1121]/90 hover:bg-[#121A2F] border border-[#2A3552]/80 hover:border-[#6366F1]/60 rounded-2xl p-3 sm:p-4 md:p-5 transition-all duration-300 group shadow-lg hover:shadow-[0_10px_30px_rgba(99,102,241,0.15)]">
+                    <div>
+                        <div class="relative w-full h-36 sm:h-44 md:h-52 lg:h-56 rounded-xl overflow-hidden bg-[#0A0F1C] border border-[#2A3552]/60 mb-3 sm:mb-4 group-hover:border-[#6366F1]/40 transition-colors">
+                            <img src="/profile/Complete Brand Identity.png" alt="Complete Brand Identity" loading="lazy" class="w-full h-full object-cover object-top sm:object-center transform group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0B1121] via-transparent to-black/20 opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                            <div class="absolute top-2 left-2 z-10">
+                                <span class="inline-flex items-center text-[9px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border backdrop-blur-md text-[#A855F7] bg-[#A855F7]/10 border-[#A855F7]/20">
+                                    Brand Identity
+                                </span>
+                            </div>
+                            <a href="https://www.behance.net/moodboard/223167327/Brand-Identity-Logo-Design" target="_blank" rel="noopener noreferrer" class="absolute top-2 right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-[#0057ff] backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all transform hover:scale-110" aria-label="Open Brand Identity on Behance">
+                                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                            <div class="absolute bottom-1.5 left-2 z-10 text-[8px] sm:text-[9px] text-gray-300 font-medium bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/10">
+                                Design Guidelines • Typography
+                            </div>
+                        </div>
+                        <h3 class="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-[#818CF8] transition-colors leading-snug">
+                            Complete Brand Identity
+                        </h3>
+                        <p class="text-gray-300/90 text-xs sm:text-[13px] leading-relaxed mt-1.5 line-clamp-2 sm:line-clamp-3">
+                            Build a cohesive visual system. We craft comprehensive brand guidelines, including premium color palettes and typography, that resonate with your target audience.
+                        </p>
+                    </div>
+                    <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#2A3552]/60">
+                        <a href="https://www.behance.net/moodboard/223167327/Brand-Identity-Logo-Design" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1E293B]/90 hover:bg-[#6366F1] text-white hover:text-white border border-[#334155] hover:border-[#6366F1] font-semibold text-xs sm:text-sm py-2 sm:py-2.5 px-3 rounded-xl transition-all duration-300 shadow-sm group/btn">
+                            <span>See Brand Systems</span>
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 3: Mobile App UI Design -->
+                <div class="portfolio-card w-[78vw] max-w-[280px] sm:w-[320px] sm:max-w-[340px] md:w-auto md:max-w-none snap-center shrink-0 flex flex-col justify-between bg-[#0B1121]/90 hover:bg-[#121A2F] border border-[#2A3552]/80 hover:border-[#6366F1]/60 rounded-2xl p-3 sm:p-4 md:p-5 transition-all duration-300 group shadow-lg hover:shadow-[0_10px_30px_rgba(99,102,241,0.15)]">
+                    <div>
+                        <div class="relative w-full h-36 sm:h-44 md:h-52 lg:h-56 rounded-xl overflow-hidden bg-[#0A0F1C] border border-[#2A3552]/60 mb-3 sm:mb-4 group-hover:border-[#6366F1]/40 transition-colors">
+                            <img src="/profile/Mobile App UI Design.png" alt="Mobile App UI/UX" loading="lazy" class="w-full h-full object-cover object-top sm:object-center transform group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0B1121] via-transparent to-black/20 opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                            <div class="absolute top-2 left-2 z-10">
+                                <span class="inline-flex items-center text-[9px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border backdrop-blur-md text-[#60A5FA] bg-[#60A5FA]/10 border-[#60A5FA]/20">
+                                    Mobile App UI Design
+                                </span>
+                            </div>
+                            <a href="https://www.behance.net/moodboard/223358043/Mobile-App-UI-Design" target="_blank" rel="noopener noreferrer" class="absolute top-2 right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-[#0057ff] backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all transform hover:scale-110" aria-label="Open Mobile App UI Design on Behance">
+                                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                            <div class="absolute bottom-1.5 left-2 z-10 text-[8px] sm:text-[9px] text-gray-300 font-medium bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/10">
+                                iOS &amp; Android • High Fidelity
+                            </div>
+                        </div>
+                        <h3 class="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-[#818CF8] transition-colors leading-snug">
+                            Mobile App UI/UX
+                        </h3>
+                        <p class="text-gray-300/90 text-xs sm:text-[13px] leading-relaxed mt-1.5 line-clamp-2 sm:line-clamp-3">
+                            Deliver intuitive and engaging experiences. We design sleek, modern, and user-centered app interfaces that look beautiful and perform seamlessly.
+                        </p>
+                    </div>
+                    <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#2A3552]/60">
+                        <a href="https://www.behance.net/moodboard/223358043/Mobile-App-UI-Design" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1E293B]/90 hover:bg-[#6366F1] text-white hover:text-white border border-[#334155] hover:border-[#6366F1] font-semibold text-xs sm:text-sm py-2 sm:py-2.5 px-3 rounded-xl transition-all duration-300 shadow-sm group/btn">
+                            <span>Explore App UI</span>
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 4: Web & Product Design -->
+                <div class="portfolio-card w-[78vw] max-w-[280px] sm:w-[320px] sm:max-w-[340px] md:w-auto md:max-w-none snap-center shrink-0 flex flex-col justify-between bg-[#0B1121]/90 hover:bg-[#121A2F] border border-[#2A3552]/80 hover:border-[#6366F1]/60 rounded-2xl p-3 sm:p-4 md:p-5 transition-all duration-300 group shadow-lg hover:shadow-[0_10px_30px_rgba(99,102,241,0.15)]">
+                    <div>
+                        <div class="relative w-full h-36 sm:h-44 md:h-52 lg:h-56 rounded-xl overflow-hidden bg-[#0A0F1C] border border-[#2A3552]/60 mb-3 sm:mb-4 group-hover:border-[#6366F1]/40 transition-colors">
+                            <img src="/profile/Web & Product Design.png" alt="Web & Product Design" loading="lazy" class="w-full h-full object-cover object-top sm:object-center transform group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0B1121] via-transparent to-black/20 opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                            <div class="absolute top-2 left-2 z-10">
+                                <span class="inline-flex items-center text-[9px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border backdrop-blur-md text-[#34D399] bg-[#34D399]/10 border-[#34D399]/20">
+                                    Web &amp; Product Design
+                                </span>
+                            </div>
+                            <a href="https://www.behance.net/selflance" target="_blank" rel="noopener noreferrer" class="absolute top-2 right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-[#0057ff] backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all transform hover:scale-110" aria-label="Open Selflance Behance Profile">
+                                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                            <div class="absolute bottom-1.5 left-2 z-10 text-[8px] sm:text-[9px] text-gray-300 font-medium bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/10">
+                                SaaS Platforms • Conversion UX
+                            </div>
+                        </div>
+                        <h3 class="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-[#818CF8] transition-colors leading-snug">
+                            Web &amp; Product Design
+                        </h3>
+                        <p class="text-gray-300/90 text-xs sm:text-[13px] leading-relaxed mt-1.5 line-clamp-2 sm:line-clamp-3">
+                            Transform complex ideas into high-converting digital products and scalable web applications engineered for measurable growth.
+                        </p>
+                    </div>
+                    <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#2A3552]/60">
+                        <a href="https://www.behance.net/selflance" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1E293B]/90 hover:bg-[#6366F1] text-white hover:text-white border border-[#334155] hover:border-[#6366F1] font-semibold text-xs sm:text-sm py-2 sm:py-2.5 px-3 rounded-xl transition-all duration-300 shadow-sm group/btn">
+                            <span>View Full Profile</span>
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mobile Carousel Indicators (dots) -->
+            <div id="portfolio-dots" class="flex md:hidden justify-center items-center gap-2 mt-4">
+                <button class="portfolio-dot w-6 h-1.5 rounded-full bg-[#6366F1] transition-all duration-300" aria-label="Go to slide 1"></button>
+                <button class="portfolio-dot w-2 h-1.5 rounded-full bg-gray-700 transition-all duration-300" aria-label="Go to slide 2"></button>
+                <button class="portfolio-dot w-2 h-1.5 rounded-full bg-gray-700 transition-all duration-300" aria-label="Go to slide 3"></button>
+                <button class="portfolio-dot w-2 h-1.5 rounded-full bg-gray-700 transition-all duration-300" aria-label="Go to slide 4"></button>
+            </div>
+
+            <!-- Footer Sub-Note -->
+            <div class="mt-6 sm:mt-8 pt-4 border-t border-[#2A3552]/60 flex flex-col sm:flex-row items-center justify-between text-gray-400 text-[11px] sm:text-xs gap-2 text-center sm:text-left">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-green-400 font-bold">✔</span>
+                    <span>100% Bespoke Systems • No generic templates or shortcuts</span>
+                </div>
+                <a href="https://www.behance.net/selflance" target="_blank" rel="noopener noreferrer" class="text-[#60A5FA] hover:text-[#93C5FD] font-semibold underline underline-offset-4 flex items-center gap-1">
+                    <span>Explore all case studies on Behance</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -1235,6 +1435,68 @@
             });
 
             goTo(0);
+        })();
+
+        // ── Portfolio Carousel Slider (Mobile touch & buttons) ──
+        (function () {
+            var slider = document.getElementById('portfolio-slider');
+            var prevBtn = document.getElementById('portfolio-prev-btn');
+            var nextBtn = document.getElementById('portfolio-next-btn');
+            var dots = document.querySelectorAll('.portfolio-dot');
+            if (!slider) return;
+
+            var cards = slider.querySelectorAll('.portfolio-card');
+            var total = cards.length;
+
+            function updateDots(idx) {
+                dots.forEach(function(dot, i) {
+                    if (i === idx) {
+                        dot.className = 'portfolio-dot w-6 h-1.5 rounded-full bg-[#6366F1] transition-all duration-300';
+                    } else {
+                        dot.className = 'portfolio-dot w-2 h-1.5 rounded-full bg-gray-700 transition-all duration-300';
+                    }
+                });
+            }
+
+            function scrollToCard(idx) {
+                if (idx < 0 || idx >= total) return;
+                var target = cards[idx];
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    updateDots(idx);
+                }
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    var itemWidth = slider.offsetWidth * 0.85;
+                    var curIdx = Math.round(slider.scrollLeft / itemWidth);
+                    scrollToCard(Math.max(0, curIdx - 1));
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    var itemWidth = slider.offsetWidth * 0.85;
+                    var curIdx = Math.round(slider.scrollLeft / itemWidth);
+                    scrollToCard(Math.min(total - 1, curIdx + 1));
+                });
+            }
+
+            slider.addEventListener('scroll', function() {
+                var itemWidth = slider.offsetWidth * 0.85;
+                var curIdx = Math.round(slider.scrollLeft / itemWidth);
+                if (curIdx >= 0 && curIdx < total) {
+                    updateDots(curIdx);
+                }
+            });
+
+            dots.forEach(function(dot, i) {
+                dot.style.cursor = 'pointer';
+                dot.addEventListener('click', function() {
+                    scrollToCard(i);
+                });
+            });
         })();
 
         // ── US Dynamic Content Switcher for ?c=us ──

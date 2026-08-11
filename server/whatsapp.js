@@ -708,8 +708,29 @@ async function updateLeadStageInFirebase({
   try {
     const cleanPhoneNum = phone ? sanitizePhoneNumber(phone) : "";
     const cleanEmailStr = email ? email.toLowerCase().trim() : "";
-    const emailPrefix = cleanEmailStr ? cleanEmailStr.replace(/[^a-z0-9]/g, "_") : "";
+    const emailPrefix = cleanEmailStr ? cleanEmailStr.split("@")[0].replace(/[^a-z0-9_]/gi, "_") : "";
     const timestamp = new Date().toISOString();
+
+    const STAGE_WEIGHTS = {
+      raw: 1,
+      "1st Connection": 2,
+      in_progress: 2,
+      survey_completed: 3,
+      meeting_booked: 4,
+      meeting_scheduled: 4,
+      proposal_sent: 5,
+      won: 6,
+      closed_won: 6,
+      not_qualified: 7,
+      disqualified: 7,
+      lost: 7,
+    };
+
+    const STATUS_WEIGHTS = {
+      partial: 1,
+      survey_completed: 2,
+      completed: 3,
+    };
 
     const campaignsObj = (await firebaseDb("campaigns")) || {};
     for (const [cKey, campaignData] of Object.entries(campaignsObj)) {
@@ -735,13 +756,31 @@ async function updateLeadStageInFirebase({
               (cleanPhoneNum && lPhone === cleanPhoneNum) ||
               (emailPrefix && lId.includes(emailPrefix))
             ) {
+              const currentStage = leadObj.pipelineStage;
+              const currentStageWeight = STAGE_WEIGHTS[currentStage] || 0;
+              const newStageWeight = STAGE_WEIGHTS[pipelineStage] || 0;
+              const isDownstreamManual = currentStageWeight >= 5;
+
               const patchPayload = { updatedAt: timestamp };
+
               if (pipelineStage) {
-                patchPayload.pipelineStage = pipelineStage;
-                patchPayload.stageMovedAt = timestamp;
+                // If lead is in a downstream manual sales stage (proposal_sent, won, not_qualified), preserve it unless manual update
+                if (!isDownstreamManual || newStageWeight >= 5) {
+                  if (newStageWeight >= currentStageWeight || !currentStage) {
+                    patchPayload.pipelineStage = pipelineStage;
+                    if (currentStage !== pipelineStage) {
+                      patchPayload.stageMovedAt = timestamp;
+                    }
+                  }
+                }
               }
+
               if (status) {
-                patchPayload.status = status;
+                const currentStatusWeight = STATUS_WEIGHTS[leadObj.status] || 0;
+                const newStatusWeight = STATUS_WEIGHTS[status] || 0;
+                if (newStatusWeight >= currentStatusWeight) {
+                  patchPayload.status = status;
+                }
               }
 
               // Atomically update lead stage and status in Firebase RTDB
@@ -776,6 +815,12 @@ async function updateLeadStageInFirebase({
               const meetingPatch = { updatedAt: timestamp };
               if (meetingTime) meetingPatch.meetingTime = meetingTime;
               if (meetingUrl) meetingPatch.meetingUrl = meetingUrl;
+              if (pipelineStage) {
+                meetingPatch.pipelineStage = pipelineStage;
+              }
+              if (status) {
+                meetingPatch.status = status;
+              }
 
               await firebaseDb(`campaigns/${cKey}/meetings/${meetingDate}/${lId}`, "PATCH", meetingPatch);
             }
@@ -992,8 +1037,32 @@ router.post("/auto-send-survey", async (req, res) => {
     const { fullName, email, phone } = req.body;
     if (!phone) return res.status(400).json({ success: false, error: "Phone number is required" });
 
+    const cleanNumber = sanitizePhoneNumber(phone);
+
+    // Atomically patch pipelineStage: "survey_completed", status: "survey_completed", and stageMovedAt in Firebase RTDB
+    if (email || phone) {
+      await updateLeadStageInFirebase({
+        phone: cleanNumber,
+        email,
+        pipelineStage: "survey_completed",
+        status: "survey_completed",
+      });
+    }
+
     const config = (await firebaseDb("whatsapp_configuration/firstoptionagency")) || {};
     const stepConfig = config.step2Survey || { isEnabled: true };
+
+    // Purge pending message queues from Step 1 (1st Connection)
+    try {
+      const { cancelAllLeadTasks, syncLeadAutomations } = require("./whatsapp_pipeline_stage_configuration");
+      await cancelAllLeadTasks(cleanNumber);
+      syncLeadAutomations(
+        { fullName, email, phone: cleanNumber, pipelineStage: "survey_completed", status: "survey_completed" },
+        "in_progress"
+      ).catch(() => {});
+    } catch (err) {
+      console.error("[Auto Send Survey] Task queue purge exception:", err);
+    }
 
     if (stepConfig.isEnabled === false) {
       return res.status(200).json({ success: false, disabled: true, message: "Step 2 Survey WhatsApp message is disabled." });
@@ -1007,20 +1076,6 @@ router.post("/auto-send-survey", async (req, res) => {
       .replace(/\{\{\s*name\s*\}\}/gi, fullName || "Valued Client")
       .replace(/\{\{\s*email\s*\}\}/gi, email || "N/A")
       .replace(/\{\{\s*phone\s*\}\}/gi, phone || "N/A");
-
-    const cleanNumber = sanitizePhoneNumber(phone);
-
-    // Purge pending message queues from Step 1 (1st Connection)
-    try {
-      const { cancelAllLeadTasks, syncLeadAutomations } = require("./whatsapp_pipeline_stage_configuration");
-      await cancelAllLeadTasks(cleanNumber);
-      syncLeadAutomations(
-        { fullName, email, phone: cleanNumber, pipelineStage: "survey_completed", status: "survey_completed" },
-        "in_progress"
-      ).catch(() => {});
-    } catch (err) {
-      console.error("[Auto Send Survey] Task queue purge exception:", err);
-    }
 
     const evoRes = await evoApiCall(`/message/sendText/${instanceName}`, "POST", { number: cleanNumber, text: formattedMessage });
 
@@ -1046,48 +1101,38 @@ router.post("/auto-send-meeting", async (req, res) => {
     const { fullName, email, phone, date, time, meetingUrl } = req.body;
     if (!phone) return res.status(400).json({ success: false, error: "Phone number is required" });
 
+    const cleanNumber = sanitizePhoneNumber(phone);
+
+    const config = (await firebaseDb("whatsapp_configuration/firstoptionagency")) || {};
+    const stepConfig = config.step3Meeting || { isEnabled: true, sendWithCard: true };
+
+    const { createUniqueGoogleMeetEvent } = require("./google_calendar");
+    let autoUniqueUrl = null;
+    try {
+      autoUniqueUrl = await createUniqueGoogleMeetEvent({ fullName, email, dateStr: date, timeStr: time });
+    } catch (gErr) {
+      console.error("Google Meet creation error:", gErr);
+    }
+    const resolvedMeetingUrl = meetingUrl || autoUniqueUrl || config.defaultMeetingUrl || "https://meet.google.com/firstoption-strategy-call";
+
     // Asynchronously send Meta Cloud API alert to founders when meeting is scheduled
     const meetingTimeStr = date && time ? `${date} at ${time}` : null;
     sendMetaCloudApiFounderNotification({ fullName, email, phone, bookingTime: meetingTimeStr }).catch((err) =>
       console.error("Async Founder Meeting Notification Exception:", err)
     );
 
-    const config = (await firebaseDb("whatsapp_configuration/firstoptionagency")) || {};
-    const stepConfig = config.step3Meeting || { isEnabled: true, sendWithCard: true };
-
-    if (stepConfig.isEnabled === false) {
-      return res.status(200).json({ success: false, disabled: true, message: "Step 3 Meeting WhatsApp confirmation is disabled." });
+    // Save resolved meeting URL & update CRM pipeline stage to meeting_booked in Firebase RTDB
+    if (email || phone) {
+      await updateLeadStageInFirebase({
+        phone: cleanNumber,
+        email,
+        pipelineStage: "meeting_booked",
+        status: "completed",
+        meetingDate: date,
+        meetingTime: time,
+        meetingUrl: resolvedMeetingUrl,
+      });
     }
-
-    const instanceName = await resolveActiveInstance(config.selectedInstanceName);
-    if (!instanceName) return res.status(400).json({ success: false, error: "No active WhatsApp instance available." });
-
-    const { createUniqueGoogleMeetEvent } = require("./google_calendar");
-    const autoUniqueUrl = await createUniqueGoogleMeetEvent({ fullName, email, dateStr: date, timeStr: time });
-    const resolvedMeetingUrl = meetingUrl || autoUniqueUrl || config.defaultMeetingUrl || "https://meet.google.com/firstoption-strategy-call";
-
-    // Format custom message template configured in WhatsApp Manager Page
-    let rawTemplate =
-      stepConfig.template ||
-      "🎉 *Appointment Confirmed!*\n\nHi *{{name}}*,\nYour 1-on-1 Business Growth Consultation has been booked successfully.\n\n📅 *Date:* {{date}}\n⏰ *Time:* {{time}}\n📧 *Email:* {{email}}\n🎥 *Google Meet Link:* {{meeting_url}}\n\nWe're excited to help you scale your business revenue!";
-
-    const formattedMessage = rawTemplate
-      .replace(/\{\{\s*name\s*\}\}/gi, fullName || "Valued Client")
-      .replace(/\{\{\s*email\s*\}\}/gi, email || "N/A")
-      .replace(/\{\{\s*phone\s*\}\}/gi, phone || "N/A")
-      .replace(/\{\{\s*date\s*\}\}/gi, date || "Upcoming Date")
-      .replace(/\{\{\s*time\s*\}\}/gi, time || "Scheduled Time")
-      .replace(/\{\{\s*meeting_url\s*\}\}/gi, resolvedMeetingUrl)
-      .replace(/\{\{\s*meeting_link\s*\}\}/gi, resolvedMeetingUrl)
-      .replace(/\{\{\s*link\s*\}\}/gi, resolvedMeetingUrl);
-
-    const cleanNumber = sanitizePhoneNumber(phone);
-    console.log(`💬 [Auto Send Meeting] Dispatching meeting confirmation to ${cleanNumber} via active instance '${instanceName}'...`);
-
-    const evoRes = await evoApiCall(`/message/sendText/${instanceName}`, "POST", {
-      number: cleanNumber,
-      text: formattedMessage,
-    });
 
     // Purge pending message queues from Step 1 (1st Connection) and Step 2 (Survey) when meeting is booked
     try {
@@ -1108,18 +1153,39 @@ router.post("/auto-send-meeting", async (req, res) => {
       console.error("[Auto Send Meeting] Task queue purge exception:", err);
     }
 
-    // Save resolved meeting URL & update CRM pipeline stage to meeting_booked in Firebase RTDB
-    if (email || phone) {
-      await updateLeadStageInFirebase({
-        phone: cleanNumber,
-        email,
-        pipelineStage: "meeting_booked",
-        status: "completed",
-        meetingDate: date,
-        meetingTime: time,
+    if (stepConfig.isEnabled === false) {
+      return res.status(200).json({
+        success: false,
+        disabled: true,
         meetingUrl: resolvedMeetingUrl,
+        message: "Step 3 Meeting WhatsApp confirmation is disabled.",
       });
     }
+
+    const instanceName = await resolveActiveInstance(config.selectedInstanceName);
+    if (!instanceName) return res.status(400).json({ success: false, error: "No active WhatsApp instance available." });
+
+    // Format custom message template configured in WhatsApp Manager Page
+    let rawTemplate =
+      stepConfig.template ||
+      "🎉 *Appointment Confirmed!*\n\nHi *{{name}}*,\nYour 1-on-1 Business Growth Consultation has been booked successfully.\n\n📅 *Date:* {{date}}\n⏰ *Time:* {{time}}\n📧 *Email:* {{email}}\n🎥 *Google Meet Link:* {{meeting_url}}\n\nWe're excited to help you scale your business revenue!";
+
+    const formattedMessage = rawTemplate
+      .replace(/\{\{\s*name\s*\}\}/gi, fullName || "Valued Client")
+      .replace(/\{\{\s*email\s*\}\}/gi, email || "N/A")
+      .replace(/\{\{\s*phone\s*\}\}/gi, phone || "N/A")
+      .replace(/\{\{\s*date\s*\}\}/gi, date || "Upcoming Date")
+      .replace(/\{\{\s*time\s*\}\}/gi, time || "Scheduled Time")
+      .replace(/\{\{\s*meeting_url\s*\}\}/gi, resolvedMeetingUrl)
+      .replace(/\{\{\s*meeting_link\s*\}\}/gi, resolvedMeetingUrl)
+      .replace(/\{\{\s*link\s*\}\}/gi, resolvedMeetingUrl);
+
+    console.log(`💬 [Auto Send Meeting] Dispatching meeting confirmation to ${cleanNumber} via active instance '${instanceName}'...`);
+
+    const evoRes = await evoApiCall(`/message/sendText/${instanceName}`, "POST", {
+      number: cleanNumber,
+      text: formattedMessage,
+    });
 
     if (evoRes.ok) {
       await firebaseDb(`whatsapp_unofficial_instances/${instanceName}`, "PATCH", {
