@@ -160,7 +160,7 @@ async function generateAndSendWhatsAppCard({
 
     const evoApiUrl = (process.env.WHATSAPP_API_URL || "https://evo.infispark.in").replace(/\/$/, "");
     const evoApiKey = process.env.WHATSAPP_API_KEY || "4296B0A7B0A9-4E64-A821-65775B345474";
-    const activeInstance = instanceName || process.env.WHATSAPP_INSTANCE_NAME || "FirstOptionSales";
+    const activeInstance = instanceName || process.env.WHATSAPP_INSTANCE_NAME || "selflance";
 
     const meetUrl = meetingUrl || "https://meet.google.com/firstoption-strategy-call";
     const captionText =
