@@ -859,9 +859,14 @@ export function BookingModal({
             <div className="bg-[#0F1629] text-white border border-[#2A3552] w-full max-w-xl rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl relative max-h-[92vh] overflow-y-auto font-sans flex flex-col justify-between my-auto">
               <div>
                 <div className="flex items-center justify-between border-b border-[#2A3552] pb-2.5 mb-3">
-                  <h3 className="text-xs sm:text-base font-bold text-white tracking-wide truncate">
-                    {activeCampaign.subtitle}
-                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="bg-[#6366F1]/20 border border-[#6366F1]/40 text-[#818CF8] text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                      Step 2 • Q{activeQIndex + 1} of {qualificationQuestions.length}
+                    </span>
+                    <h3 className="text-xs sm:text-sm font-bold text-white tracking-wide truncate max-w-[200px] sm:max-w-xs">
+                      {activeCampaign.subtitle}
+                    </h3>
+                  </div>
                   <button
                     onClick={handleReset}
                     className="w-7 h-7 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm cursor-pointer"
@@ -873,14 +878,15 @@ export function BookingModal({
                 {(() => {
                   const currentQ = qualificationQuestions[activeQIndex];
                   if (!currentQ) return null;
+                  const isGrid = currentQ.options.length > 5;
                   return (
-                    <div className="space-y-4 pt-1">
-                      <div className="text-sm sm:text-lg md:text-xl font-medium text-gray-100 flex items-start space-x-2">
-                        <span className="text-[#df7626] font-bold flex-shrink-0">{currentQ.num} ➔</span>
+                    <div className="space-y-3 pt-1">
+                      <div className="text-sm sm:text-base md:text-lg font-bold text-gray-100 flex items-start space-x-2">
+                        <span className="text-[#df7626] font-extrabold flex-shrink-0">{currentQ.num} ➔</span>
                         <span>{currentQ.question}</span>
                       </div>
 
-                      <div className="space-y-2 pt-1 max-w-md">
+                      <div className={isGrid ? "grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto pr-1" : "space-y-2 max-w-md"}>
                         {currentQ.options.map((opt) => {
                           const isSelected = qAnswers[currentQ.field] === opt.label;
                           return (
@@ -893,14 +899,14 @@ export function BookingModal({
                                   setActiveQIndex(activeQIndex + 1);
                                 }
                               }}
-                              className={`w-full text-left p-2.5 sm:p-3.5 rounded-xl border flex items-center justify-between transition-all duration-200 cursor-pointer ${
+                              className={`w-full text-left p-2.5 sm:p-3 rounded-xl border flex items-center justify-between transition-all duration-200 cursor-pointer ${
                                 isSelected
                                   ? "bg-[#6366F1]/20 border-2 border-[#6366F1] text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                                   : "bg-[#131C35] border-[#2A3552] text-gray-200 hover:border-[#6366F1]/50 hover:bg-[#1A233D]"
                               }`}
                             >
                               <span className="text-xs sm:text-sm font-semibold">{opt.label}</span>
-                              <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-[#2A3552] text-gray-400 text-[10px] sm:text-xs font-mono flex items-center justify-center bg-[#0B1121] flex-shrink-0">
+                              <span className="w-5 h-5 rounded-full border border-[#2A3552] text-gray-400 text-[10px] font-mono flex items-center justify-center bg-[#0B1121] flex-shrink-0 ml-2">
                                 {opt.key}
                               </span>
                             </button>
