@@ -16,6 +16,7 @@ import { WhyChooseUsSection } from "@/components/selflance/WhyChooseUsSection";
 import { DevelopmentProcessSection } from "@/components/selflance/DevelopmentProcessSection";
 import { BeforeYouBookSection } from "@/components/selflance/BeforeYouBookSection";
 import { SelflanceFinalCTA } from "@/components/selflance/SelflanceFinalCTA";
+import { StickyMobileCTA } from "@/components/StickyMobileCTA";
 import { BookingModal } from "@/components/BookingModal";
 import { VideoModal } from "@/components/VideoModal";
 
@@ -227,8 +228,8 @@ export default function Home({
         />
       </Suspense>
 
-      {/* Fixed Navigation Header */}
-      <SelflanceHeader />
+      {/* Fixed Navigation Header with CTA */}
+      <SelflanceHeader onBookClick={handleOpenBooking} />
 
       {/* Section 1: Hero Section */}
       <SelflanceHero
@@ -269,6 +270,9 @@ export default function Home({
 
       {/* Section 11: Final CTA Banner & Footer */}
       <SelflanceFinalCTA isUS={isUS} onBookClick={handleOpenBooking} />
+
+      {/* Fixed Floating CTA Bar (Appears upon scroll) */}
+      <StickyMobileCTA onBookClick={handleOpenBooking} />
 
       {/* Booking Modal */}
       <BookingModal

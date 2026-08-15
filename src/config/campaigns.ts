@@ -18,54 +18,86 @@ export interface CampaignConfig {
 }
 
 export const CAMPAIGNS: Record<string, CampaignConfig> = {
-  firstoptionagency: {
-    id: "firstoptionagency",
-    title: "First Option Agency",
-    subtitle: "Let's Understand Your Business Before We Grow It",
+  selflance: {
+    id: "selflance",
+    title: "Selflance Technology Partner",
+    subtitle: "Quick 30-Second Software Project Assessment",
     questions: [
       {
-        num: 2,
-        question: "What industry are you in? *",
-        field: "industry",
+        num: 1,
+        question: "What type of software or digital solution does your business need? *",
+        field: "softwareType",
         options: [
-          { label: "Doctor / Clinic", key: "A" },
-          { label: "Manufacturer / Distributor", key: "B" },
-          { label: "IT / Tech / SaaS", key: "C" },
-          { label: "Service Business", key: "D" },
-          { label: "Other", key: "E" },
+          { label: "Custom Software (CRM / ERP / Internal Portal)", key: "A" },
+          { label: "Mobile App Development (iOS & Android)", key: "B" },
+          { label: "High-Converting Enterprise Website / Web App", key: "C" },
+          { label: "Business Process & Workflow Automation (APIs & Bots)", key: "D" },
+          { label: "Complete End-to-End Digital Transformation", key: "E" },
+        ],
+      },
+      {
+        num: 2,
+        question: "What is your primary growth bottleneck or goal right now? *",
+        field: "primaryGoal",
+        options: [
+          { label: "Automate manual work & scale team efficiency", key: "A" },
+          { label: "Scale sales, leads & customer acquisition online", key: "B" },
+          { label: "Upgrade / replace slow or outdated legacy systems", key: "C" },
+          { label: "Build a brand-new software / SaaS product from scratch", key: "D" },
+          { label: "Multi-branch / multi-location operations management", key: "E" },
         ],
       },
       {
         num: 3,
-        question: "What is your role in the business? *",
-        field: "role",
+        question: "What is your target timeline to start this development project? *",
+        field: "projectTimeline",
         options: [
-          { label: "Founder / Owner", key: "A" },
-          { label: "Partner", key: "B" },
-          { label: "Marketing Head", key: "C" },
-          { label: "Team Member", key: "D" },
+          { label: "Ready to start immediately (Within 1-2 weeks)", key: "A" },
+          { label: "Planning to start this month (2-4 weeks)", key: "B" },
+          { label: "Next quarter / Exploring scope & feasibility", key: "C" },
+          { label: "Need a 1-on-1 strategy call first to plan roadmap & budget", key: "D" },
+        ],
+      },
+    ],
+  },
+  firstoptionagency: {
+    id: "firstoptionagency",
+    title: "Selflance Technology Partner",
+    subtitle: "Quick 30-Second Software Project Assessment",
+    questions: [
+      {
+        num: 1,
+        question: "What type of software or digital solution does your business need? *",
+        field: "softwareType",
+        options: [
+          { label: "Custom Software (CRM / ERP / Internal Portal)", key: "A" },
+          { label: "Mobile App Development (iOS & Android)", key: "B" },
+          { label: "High-Converting Enterprise Website / Web App", key: "C" },
+          { label: "Business Process & Workflow Automation (APIs & Bots)", key: "D" },
+          { label: "Complete End-to-End Digital Transformation", key: "E" },
         ],
       },
       {
-        num: 4,
-        question: "What is your current monthly revenue? *",
-        field: "revenue",
+        num: 2,
+        question: "What is your primary growth bottleneck or goal right now? *",
+        field: "primaryGoal",
         options: [
-          { label: "Below ₹5L", key: "A" },
-          { label: "₹5L – ₹10L", key: "B" },
-          { label: "₹10L – ₹25L", key: "C" },
-          { label: "₹25L – ₹50L", key: "D" },
-          { label: "₹50L+", key: "E" },
+          { label: "Automate manual work & scale team efficiency", key: "A" },
+          { label: "Scale sales, leads & customer acquisition online", key: "B" },
+          { label: "Upgrade / replace slow or outdated legacy systems", key: "C" },
+          { label: "Build a brand-new software / SaaS product from scratch", key: "D" },
+          { label: "Multi-branch / multi-location operations management", key: "E" },
         ],
       },
       {
-        num: 5,
-        question: "Are you ready to invest in a proper marketing system if it makes financial sense? *",
-        field: "investmentReady",
+        num: 3,
+        question: "What is your target timeline to start this development project? *",
+        field: "projectTimeline",
         options: [
-          { label: "Yes", key: "A" },
-          { label: "Maybe", key: "B" },
-          { label: "Just exploring", key: "C" },
+          { label: "Ready to start immediately (Within 1-2 weeks)", key: "A" },
+          { label: "Planning to start this month (2-4 weeks)", key: "B" },
+          { label: "Next quarter / Exploring scope & feasibility", key: "C" },
+          { label: "Need a 1-on-1 strategy call first to plan roadmap & budget", key: "D" },
         ],
       },
     ],
@@ -76,7 +108,7 @@ export const CAMPAIGNS: Record<string, CampaignConfig> = {
     subtitle: "Help Us Tailor Your Patient Acquisition Strategy",
     questions: [
       {
-        num: 2,
+        num: 1,
         question: "What type of practice do you run? *",
         field: "practiceType",
         options: [
@@ -88,7 +120,7 @@ export const CAMPAIGNS: Record<string, CampaignConfig> = {
         ],
       },
       {
-        num: 3,
+        num: 2,
         question: "How many new patients do you want per month? *",
         field: "targetPatients",
         options: [
@@ -98,7 +130,7 @@ export const CAMPAIGNS: Record<string, CampaignConfig> = {
         ],
       },
       {
-        num: 4,
+        num: 3,
         question: "Are you currently running Google or Meta Ads? *",
         field: "currentAdsStatus",
         options: [
@@ -111,7 +143,7 @@ export const CAMPAIGNS: Record<string, CampaignConfig> = {
   },
 };
 
-export const DEFAULT_CAMPAIGN_ID = "firstoptionagency";
+export const DEFAULT_CAMPAIGN_ID = "selflance";
 
 export function getCampaignConfig(campaignId?: string | null): CampaignConfig {
   if (campaignId && CAMPAIGNS[campaignId]) {

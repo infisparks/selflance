@@ -86,6 +86,9 @@ export async function cancelLeadCloudTasks(phone: string): Promise<void> {
 
 
 export interface SurveyData {
+  softwareType?: string;
+  primaryGoal?: string;
+  projectTimeline?: string;
   industry?: string;
   role?: string;
   revenue?: string;

@@ -7,8 +7,8 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show sticky CTA once user scrolls past 280px (past top hero section)
-      if (window.scrollY > 280) {
+      // Show sticky CTA once user scrolls past 240px (past top hero section)
+      if (window.scrollY > 240) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -22,14 +22,14 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
 
   return (
     <div
-      className={`fixed bottom-3 left-3 right-3 sm:bottom-5 sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-xl z-50 transition-all duration-500 ease-out ${
+      className={`fixed bottom-3 left-3 right-3 sm:bottom-5 sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-xl z-40 transition-all duration-500 ease-out ${
         isVisible
           ? "translate-y-0 opacity-100 pointer-events-auto"
           : "translate-y-16 opacity-0 pointer-events-none"
       }`}
     >
       {/* Container: Glassmorphic Floating Pill Bar */}
-      <div className="bg-zinc-950/95 border-2 border-amber-400/80 rounded-2xl sm:rounded-full p-2.5 sm:p-2 sm:px-4 shadow-[0_10px_40px_rgba(245,166,35,0.4)] backdrop-blur-xl flex items-center justify-between gap-2.5">
+      <div className="bg-[#0F1629]/95 border border-[#2A3552] rounded-2xl sm:rounded-full p-2.5 sm:p-2 sm:px-4 shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl flex items-center justify-between gap-2.5">
         {/* Left Side: Pulsing Dot & Urgency Info */}
         <div className="flex items-center space-x-2.5 overflow-hidden pl-1">
           {/* Pulsing Live Urgency Badge */}
@@ -41,22 +41,22 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
           <div className="text-left leading-tight overflow-hidden">
             <div className="flex items-center space-x-1.5">
               <span className="text-[10px] sm:text-xs font-black text-amber-400 uppercase tracking-widest truncate">
-                🔥 3 Spots Left This Month
+                ⚡ Free 30-Min Strategy Call
               </span>
             </div>
             <p className="text-xs sm:text-sm font-extrabold text-white truncate">
-              Ready to Scale Revenue?
+              Ready To Scale Your Tech?
             </p>
           </div>
         </div>
 
-        {/* Right Side: High-Impact Gold Button */}
+        {/* Right Side: High-Impact Gradient Button */}
         <button
           onClick={onBookClick}
-          className="cta-gold-btn shimmer py-2.5 px-3.5 sm:px-5 rounded-xl sm:rounded-full text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wide flex items-center space-x-1.5 shadow-xl hover:scale-105 active:scale-95 transition-all flex-shrink-0"
+          className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-extrabold text-xs sm:text-sm py-2.5 px-3.5 sm:px-5 rounded-xl sm:rounded-full uppercase tracking-wide flex items-center space-x-1.5 shadow-[0_0_20px_rgba(223,118,38,0.4)] hover:scale-105 active:scale-95 transition-all flex-shrink-0 cursor-pointer"
         >
-          <span>BOOK APPOINTMENT</span>
-          <i className="fa-solid fa-arrow-right text-xs"></i>
+          <span>Book Strategy Call</span>
+          <i className="fa-solid fa-arrow-right text-[11px]"></i>
         </button>
       </div>
     </div>
