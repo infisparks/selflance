@@ -17,6 +17,7 @@ import { DevelopmentProcessSection } from "@/components/selflance/DevelopmentPro
 import { BeforeYouBookSection } from "@/components/selflance/BeforeYouBookSection";
 import { SelflanceFinalCTA } from "@/components/selflance/SelflanceFinalCTA";
 import { StickyMobileCTA } from "@/components/StickyMobileCTA";
+import { FloatingWhatsAppCTA } from "@/components/FloatingWhatsAppCTA";
 import { BookingModal } from "@/components/BookingModal";
 import { VideoModal } from "@/components/VideoModal";
 
@@ -273,6 +274,9 @@ export default function Home({
 
       {/* Fixed Floating CTA Bar (Appears upon scroll) */}
       <StickyMobileCTA onBookClick={handleOpenBooking} />
+
+      {/* Fixed Floating WhatsApp CTA Button (918850448767) */}
+      <FloatingWhatsAppCTA />
 
       {/* Booking Modal */}
       <BookingModal
