@@ -85,7 +85,7 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
       <footer className="w-full border-t border-gray-800/80 bg-[#070B16] py-10 px-4 sm:px-6 relative z-10 text-center sm:text-left overflow-hidden">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <div className="flex items-center mb-2 justify-center sm:justify-start">
+            <div className="flex items-center mb-2.5 justify-center sm:justify-start">
               <img
                 src="/Selflance Logo.png"
                 alt="Selflance Logo"
@@ -95,9 +95,14 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
             <p className="text-[#818CF8] text-xs sm:text-sm font-semibold max-w-md">
               We Engineer Technology That Helps Businesses Scale Faster.
             </p>
-            <p className="text-gray-500 text-[11px] mt-1">
-              India&apos;s Premier Business Technology Partner.
-            </p>
+            <div className="mt-2 space-y-0.5">
+              <p className="text-gray-300 text-xs font-semibold">
+                Selflance Technologies Private Limited
+              </p>
+              <p className="text-gray-400 text-[11px] font-medium">
+                CIN: <span className="font-mono text-gray-300 font-semibold tracking-wide">U63999MH2023PTC400992</span>
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -105,7 +110,7 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
               href="https://wa.me/918850448767"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-[#25D366]/10 px-4 py-2 rounded-full border border-[#25D366]/30 text-[#25D366] text-xs font-bold hover:bg-[#25D366]/20 transition-colors"
+              className="flex items-center gap-2 bg-[#25D366]/10 px-4 py-2 rounded-full border border-[#25D366]/30 text-[#25D366] text-xs font-bold hover:bg-[#25D366]/20 transition-colors shadow-sm"
             >
               <span>WhatsApp Us</span>
             </a>
@@ -113,7 +118,7 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
         </div>
 
         <div className="max-w-5xl mx-auto border-t border-gray-800/60 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-gray-500 text-[11px] gap-2">
-          <span>&copy; {new Date().getFullYear()} Selflance. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} Selflance Technologies Private Limited. All rights reserved.</span>
           <span>Technology &bull; Automation &bull; Digital Transformation</span>
         </div>
       </footer>
