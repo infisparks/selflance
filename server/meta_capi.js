@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const router = express.Router();
 
 // Fallback Meta Pixel ID & Access Token
-const META_PIXEL_ID = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || "1307016724814793";
+const META_PIXEL_ID = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || "698546976470012";
 const META_ACCESS_TOKEN = process.env.META_CAPI_ACCESS_TOKEN || "EAAcwP3ozPkIBSNZB1j8HtxYhBjwbOan1DXmN9eY8rfmczjMQtzOgcvJMkSX0ZCPfjrVyD8ycvVjudkLcIx7KnzMpKPlR43ESAWBG6j5ElykzE3rSjuYQPPTkuZB0EikpkRTAkxG0ZAvljy9HTekAgQilZBWWZBr3dAiBe8pkhYn0MrPclMaVGXxiQcqibnOgZDZD";
 
 /**
