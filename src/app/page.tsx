@@ -206,7 +206,7 @@ export default function Home({
       isOpen: true,
       title: "Selflance Digital Growth Engine",
       author: "Selflance Technology Team",
-      embedId: "SelflanceDemo",
+      embedId: "Otgmq0_YlnQ",
     });
   }, []);
 

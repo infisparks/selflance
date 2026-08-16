@@ -70,6 +70,7 @@ const testimonialsUS = [
 
 export function SelflanceHero({ isUS = false, onBookClick, onVideoClick }: SelflanceHeroProps) {
   const [activeTestiIndex, setActiveTestiIndex] = useState(0);
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
   const testimonials = isUS ? testimonialsUS : testimonialsIN;
 
   // Carousel auto advance
@@ -198,26 +199,36 @@ export function SelflanceHero({ isUS = false, onBookClick, onVideoClick }: Selfl
         </div>
       </div>
 
-      {/* VIDEO THUMBNAIL */}
-      <div
-        onClick={onVideoClick || onBookClick}
-        className="relative w-full max-w-[340px] sm:max-w-lg lg:max-w-xl mx-auto group cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-[0_12px_35px_rgba(0,0,0,0.6)] z-20 border border-gray-700/60 bg-[#0A0F1C] overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-[#df7626]/15 blur-[25px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-        <div className="relative w-full h-full flex items-center justify-center">
-          <img
-            src="https://raw.githubusercontent.com/infisparks/images/refs/heads/main/Selflancethumbnail.png"
-            alt="Selflance Digital Growth Engine Presentation"
-            className="w-full h-auto object-cover block transform group-hover:scale-105 transition-transform duration-500"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors duration-300">
-            <div className="w-12 h-8 sm:w-16 sm:h-11 bg-[#FF0000] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,0,0,0.6)] transform group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-5 h-5 sm:w-7 sm:h-7 text-white ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
+      {/* VIDEO CONTAINER */}
+      <div className="relative w-full max-w-[340px] sm:max-w-lg lg:max-w-xl mx-auto group rounded-2xl transition-all duration-300 hover:shadow-[0_12px_35px_rgba(223,118,38,0.25)] shadow-[0_12px_35px_rgba(0,0,0,0.6)] z-20 border border-gray-700/60 bg-[#0A0F1C] overflow-hidden aspect-video">
+        {isPlayingVideo ? (
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/Otgmq0_YlnQ?autoplay=1&rel=0&modestbranding=1&playsinline=1"
+            title="Selflance Digital Growth Engine Presentation"
+            className="w-full h-full border-0 rounded-2xl"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          ></iframe>
+        ) : (
+          <div
+            onClick={() => setIsPlayingVideo(true)}
+            className="relative w-full h-full cursor-pointer flex items-center justify-center"
+          >
+            <div className="absolute inset-0 bg-[#df7626]/15 blur-[25px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+            <img
+              src="https://raw.githubusercontent.com/infisparks/images/refs/heads/main/Selflancethumbnail.png"
+              alt="Selflance Digital Growth Engine Presentation"
+              className="w-full h-full object-cover block transform group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors duration-300">
+              <div className="w-12 h-8 sm:w-16 sm:h-11 bg-[#FF0000] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,0,0,0.6)] transform group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-5 h-5 sm:w-7 sm:h-7 text-white ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ROTATING TESTIMONIAL STRIP */}

@@ -29,10 +29,10 @@ export function VideoModal({ isOpen, onClose, title, author, embedId, onBookClic
         <div className="relative aspect-video w-full bg-black flex items-center justify-center">
           {embedId ? (
             <iframe
-              src={`https://www.youtube.com/embed/${embedId}?autoplay=1`}
+              src={`https://www.youtube-nocookie.com/embed/${embedId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
               title={title}
               className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             ></iframe>
           ) : (
