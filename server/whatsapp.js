@@ -840,7 +840,7 @@ async function sendMetaCloudApiFounderNotification({ fullName, email, phone, boo
   try {
     const phoneNumberId = process.env.META_WA_PHONE_NUMBER_ID || "1256030487590811";
     const accessToken = process.env.META_WA_ACCESS_TOKEN || "EAAxIo8W1d1YBSLFZAZC7I2NKjBGLpIu7xZAZAhsZC1Biy3wbAc2t92kpZAaYiPdprUegE1RMPY6lgdZCzyrX6htgc9FpaoJtNdTDJZAZBTxTllKGqgqMRCxqmVod8U12veudujp5l2G6DVRATh0Uk4UwMl8zAXZB4QZBKlSED7e5XiW0wliSnHouSoxj8AADDOhHsX54wZDZD";
-    const rawFounderNumbers = process.env.META_WA_FOUNDER_NUMBERS || "918850448767";
+    const rawFounderNumbers = process.env.META_WA_FOUNDER_NUMBERS || "919082242280";
     const templateName = process.env.META_WA_TEMPLATE_NAME || "new_lead_founder_alert";
     const headerImageUrl = process.env.META_WA_HEADER_IMAGE_URL || "https://raw.githubusercontent.com/infisparks/images/refs/heads/main/new_lead.png";
     const templateLang = process.env.META_WA_TEMPLATE_LANG || "en";
@@ -1566,7 +1566,7 @@ router.post("/notify-admin-ticket", async (req, res) => {
     }
 
     if (adminPhones.size === 0) {
-      adminPhones.add("918850448767"); // Default Master Admin
+      adminPhones.add("919082242280"); // Default Master Admin
     }
 
     const urgencyMap = {

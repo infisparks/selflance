@@ -275,7 +275,7 @@ export default function Home({
       {/* Fixed Floating CTA Bar (Appears upon scroll) */}
       <StickyMobileCTA onBookClick={handleOpenBooking} />
 
-      {/* Fixed Floating WhatsApp CTA Button (918850448767) */}
+      {/* Fixed Floating WhatsApp CTA Button (919082242280) */}
       <FloatingWhatsAppCTA />
 
       {/* Booking Modal */}
