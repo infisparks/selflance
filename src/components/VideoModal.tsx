@@ -38,8 +38,10 @@ export function VideoModal({ isOpen, onClose, title, author, embedId, onBookClic
           ) : (
             <div className="relative aspect-video w-full bg-black flex items-center justify-center">
               <img
-                src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=80"
+                src="/thumbnail.png"
                 alt={title}
+                width={1672}
+                height={941}
                 className="w-full h-full object-cover opacity-80"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent flex flex-col items-center justify-center p-4 text-center">

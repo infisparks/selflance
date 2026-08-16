@@ -20,7 +20,7 @@ export interface CampaignConfig {
 export const CAMPAIGNS: Record<string, CampaignConfig> = {
   selflance: {
     id: "selflance",
-    title: "Selflance Technology Partner",
+    title: "Selflance Technologies Private Limited.",
     subtitle: "Quick 30-Second Software Project Assessment",
     questions: [
       {
@@ -82,7 +82,7 @@ export const CAMPAIGNS: Record<string, CampaignConfig> = {
   },
   firstoptionagency: {
     id: "firstoptionagency",
-    title: "Selflance Technology Partner",
+    title: "Selflance Technologies Private Limited.",
     subtitle: "Quick 30-Second Software Project Assessment",
     questions: [
       {

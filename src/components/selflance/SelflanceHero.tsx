@@ -216,8 +216,10 @@ export function SelflanceHero({ isUS = false, onBookClick, onVideoClick }: Selfl
           >
             <div className="absolute inset-0 bg-[#df7626]/15 blur-[25px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
             <img
-              src="https://raw.githubusercontent.com/infisparks/images/refs/heads/main/Selflancethumbnail.png"
+              src="/thumbnail.png"
               alt="Selflance Digital Growth Engine Presentation"
+              width={1672}
+              height={941}
               className="w-full h-full object-cover block transform group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors duration-300">
