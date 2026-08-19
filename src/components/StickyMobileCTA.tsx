@@ -50,21 +50,11 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
           </div>
         </div>
 
-        {/* Right Side: High-Impact Buttons */}
+        {/* Right Side: High-Impact Button */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <a
-            href="https://wa.me/919082242280?text=Hi%20Selflance%2C%20I%20want%20to%20discuss%20a%20software%20project"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Chat on WhatsApp (+91 9082242280)"
-            className="hidden xs:flex sm:flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#25D366]/20 border border-[#25D366]/50 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all shadow-md hover:scale-105 active:scale-95"
-          >
-            <i className="fa-brands fa-whatsapp text-lg"></i>
-          </a>
-
           <button
             onClick={onBookClick}
-            className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-extrabold text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-5 rounded-xl sm:rounded-full uppercase tracking-wide flex items-center space-x-1.5 shadow-[0_0_20px_rgba(223,118,38,0.4)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 sm:py-2.5 sm:px-5 rounded-xl sm:rounded-full uppercase tracking-wide flex items-center space-x-1.5 shadow-[0_0_20px_rgba(223,118,38,0.4)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
             <span>Book Strategy Call</span>
             <i className="fa-solid fa-arrow-right text-[11px]"></i>

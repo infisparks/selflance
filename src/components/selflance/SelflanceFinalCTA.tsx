@@ -106,14 +106,15 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
           </div>
 
           <div className="flex items-center gap-3">
-            <a
-              href="https://wa.me/919082242280"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-[#25D366]/10 px-4 py-2 rounded-full border border-[#25D366]/30 text-[#25D366] text-xs font-bold hover:bg-[#25D366]/20 transition-colors shadow-sm"
+            <button
+              onClick={onBookClick}
+              className="flex items-center gap-2 bg-[#df7626]/20 px-4 py-2 rounded-full border border-[#df7626]/40 text-[#df7626] text-xs font-bold hover:bg-[#df7626]/30 transition-colors shadow-sm cursor-pointer"
             >
-              <span>WhatsApp Us</span>
-            </a>
+              <span>Book Strategy Call</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </button>
           </div>
         </div>
 
