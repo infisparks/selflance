@@ -3,39 +3,21 @@ import Script from "next/script";
 import "./globals.css";
 import { FB_PIXEL_ID } from "@/lib/fpixel";
 
-const siteDomain = "https://firstoptionagency.vercel.app";
-const ogImageUrl = `${siteDomain}/firstoption/whatsapp_thumbanil.png`;
+const siteDomain = "https://diamondboutique.in";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteDomain),
-  title: "Selflance – Digital Growth Engine for Scaling Businesses",
+  title: "Diamond Boutique | 100% Original Pakistani Suits & In-House Master Tailoring Mumbai",
   description:
-    "Selflance builds Technology, Automation & Strategy systems to transform manual hustle into scalable growth engines. Book your free strategy session today.",
+    "Mumbai ki premier destination for 100% original Pakistani suits, luxury unstitched lawn, ready-made designer collections, in-house master stitching, aur B2B wholesale distributorship in Attar Gali.",
   keywords:
-    "digital growth engine, software automation, business technology partner, enterprise web development, mobile app development, custom CRM ERP",
+    "Pakistani suits Mumbai, original Pakistani lawn, master tailoring Attar Gali, wholesale Pakistani suits, Siddiqui Coutures Mumbai",
   openGraph: {
-    title: "Selflance – Digital Growth Engine for Scaling Businesses",
+    title: "Diamond Boutique | 100% Original Pakistani Suits & In-House Master Tailoring Mumbai",
     description:
-      "Selflance builds Technology, Automation & Strategy systems to transform manual hustle into scalable growth engines. Book your free strategy session today.",
-    url: siteDomain,
-    siteName: "Selflance",
-    images: [
-      {
-        url: ogImageUrl,
-        width: 1200,
-        height: 630,
-        alt: "Selflance – Digital Growth Engine for Scaling Businesses",
-      },
-    ],
-    locale: "en_US",
+      "Mumbai ki premier destination for 100% original Pakistani suits, luxury unstitched lawn, ready-made designer collections, in-house master stitching, aur B2B wholesale distributorship in Attar Gali.",
+    siteName: "Diamond Boutique",
+    locale: "en_IN",
     type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Selflance – Digital Growth Engine for Scaling Businesses",
-    description:
-      "Selflance builds Technology, Automation & Strategy systems to transform manual hustle into scalable growth engines. Book your free strategy session today.",
-    images: [ogImageUrl],
   },
 };
 
@@ -47,41 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth h-full antialiased">
       <head>
-        {/* Open Graph / WhatsApp Social Preview Tags */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={siteDomain} />
-        <meta property="og:site_name" content="First Option Agency" />
-        <meta
-          property="og:title"
-          content="First Option Agency | Turn Clicks into Real Appointments & Sales"
-        />
-        <meta
-          property="og:description"
-          content="Predictable growth. Serious inquiries. Real revenue for Doctors, Manufacturers, IT Companies & Retailers."
-        />
-        <meta property="og:image" content={ogImageUrl} />
-        <meta property="og:image:secure_url" content={ogImageUrl} />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="First Option Agency | Turn Clicks into Real Appointments & Sales"
-        />
-        <meta
-          name="twitter:description"
-          content="Predictable growth. Serious inquiries. Real revenue for Doctors, Manufacturers, IT Companies & Retailers."
-        />
-        <meta name="twitter:image" content={ogImageUrl} />
-
-        {/* Google Fonts: Plus Jakarta Sans */}
+        {/* Google Fonts: Inter & Playfair Display */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&display=swap"
           rel="stylesheet"
         />
 
@@ -94,7 +46,7 @@ export default function RootLayout({
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className="w-full min-h-full bg-[#08080a] text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950">
+      <body className="w-full min-h-full bg-slate-50 text-slate-800 font-sans antialiased selection:bg-purple-600 selection:text-white">
         {children}
 
         {/* Meta Pixel Code */}

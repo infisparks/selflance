@@ -613,54 +613,54 @@ export function BookingModal({
       .catch((err) => console.error("Async WhatsApp Meeting Confirmation Error:", err));
   };
 
-  const whatsappMessage = `Hi Selflance, I just booked a Strategy Session.\nName: ${contactInfo.fullName || "User"}\nEmail: ${contactInfo.email || "N/A"}\nPhone: ${contactInfo.countryCode} ${contactInfo.phone || "N/A"}\nBooked Slot: ${formattedBookingDate} at ${selectedTimeSlot || "02:00 PM"}`;
-  const whatsappUrl = `https://wa.me/919082242280?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappMessage = `Hi Diamond Boutique, I just booked a VIP appointment / inquiry.\nName: ${contactInfo.fullName || "Customer"}\nEmail: ${contactInfo.email || "N/A"}\nPhone: ${contactInfo.countryCode} ${contactInfo.phone || "N/A"}\nBooked Slot: ${formattedBookingDate} at ${selectedTimeSlot || "02:00 PM"}`;
+  const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(whatsappMessage)}`;
 
   const qualificationQuestions = activeCampaign.questions;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
       {/* Already Submitted Popup */}
       {showAlreadySubmittedPopup ? (
-        <div className="bg-gradient-to-b from-[#141A2D] via-[#0F1629] to-[#0B1121] text-white border border-[#df7626]/40 w-full max-w-md sm:max-w-lg rounded-3xl p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative max-h-[92vh] overflow-y-auto font-sans text-center my-auto">
+        <div className="bg-gradient-to-b from-[#2e1065] via-[#150430] to-[#0c021c] text-white border border-purple-400/40 w-full max-w-md sm:max-w-lg rounded-3xl p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative max-h-[92vh] overflow-y-auto font-sans text-center my-auto">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm transition-colors cursor-pointer"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full text-purple-300 hover:text-white hover:bg-purple-900/60 flex items-center justify-center text-sm transition-colors cursor-pointer"
           >
             <i className="fa-solid fa-xmark"></i>
           </button>
 
-          <div className="w-16 h-16 rounded-full bg-[#df7626]/20 border-2 border-[#df7626] text-[#df7626] flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
-            <i className="fa-solid fa-circle-check"></i>
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-amber-400 text-slate-950 flex items-center justify-center text-2xl mx-auto shadow-lg mb-3">
+            <i className="fa-solid fa-gem"></i>
           </div>
 
-          <div className="inline-flex items-center space-x-1.5 bg-[#df7626]/10 border border-[#df7626]/30 px-3 py-1 rounded-full text-[#df7626] text-xs font-bold mb-3">
-            <i className="fa-solid fa-shield-halved"></i>
+          <div className="inline-flex items-center space-x-1.5 bg-purple-500/20 border border-purple-400/40 px-3 py-1 rounded-full text-gold-300 text-xs font-bold mb-3">
+            <i className="fa-solid fa-shield-halved text-amber-400"></i>
             <span>Form Already Submitted</span>
           </div>
 
-          <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+          <h3 className="text-xl sm:text-2xl font-black font-serif text-white leading-tight">
             You&apos;ve Already Registered!
           </h3>
 
-          <p className="text-xs sm:text-sm text-gray-300 font-medium leading-relaxed mt-2 max-w-sm mx-auto">
-            We already have your contact details on file. For any query, assistance, or urgent strategy updates, contact us directly:
+          <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed mt-2 max-w-sm mx-auto">
+            Aapki details hamare paas saved hain. Distributorship rates, custom stitching, ya store visit ke liye direct WhatsApp par connect karein:
           </p>
 
           {contactInfo.fullName && (
-            <div className="bg-[#0B1121] border border-[#2A3552] rounded-2xl p-3.5 mt-4 text-left text-xs space-y-1.5 font-mono shadow-inner">
-              <div className="flex justify-between items-center text-gray-400">
+            <div className="bg-[#150430]/90 border border-purple-500/30 rounded-2xl p-3.5 mt-4 text-left text-xs space-y-1.5 font-mono shadow-inner">
+              <div className="flex justify-between items-center text-slate-400">
                 <span>Registered Name:</span>
                 <span className="text-white font-bold font-sans">{contactInfo.fullName}</span>
               </div>
               {contactInfo.email && (
-                <div className="flex justify-between items-center text-gray-400">
+                <div className="flex justify-between items-center text-slate-400">
                   <span>Registered Email:</span>
-                  <span className="text-[#df7626] font-bold">{contactInfo.email}</span>
+                  <span className="text-gold-300 font-bold">{contactInfo.email}</span>
                 </div>
               )}
               {contactInfo.phone && (
-                <div className="flex justify-between items-center text-gray-400">
+                <div className="flex justify-between items-center text-slate-400">
                   <span>Registered Phone:</span>
                   <span className="text-white font-bold">{contactInfo.countryCode} {contactInfo.phone}</span>
                 </div>
@@ -670,10 +670,10 @@ export function BookingModal({
 
           <div className="space-y-2.5 mt-5">
             <a
-              href="https://wa.me/919082242280"
+              href="https://wa.me/919876543210"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black p-3.5 rounded-2xl text-xs sm:text-sm uppercase tracking-wide flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
+              className="w-full bg-green-600 hover:bg-green-500 text-white font-black p-3.5 rounded-2xl text-xs sm:text-sm uppercase tracking-wide flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
             >
               <i className="fa-brands fa-whatsapp text-lg"></i>
               <span>Chat on WhatsApp</span>
@@ -687,9 +687,9 @@ export function BookingModal({
                   setIsReselectingSlot(true);
                   setStep(3);
                 }}
-                className="bg-[#df7626]/20 hover:bg-[#df7626]/30 border border-[#df7626]/40 text-[#df7626] font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="bg-purple-900/60 hover:bg-purple-800 border border-purple-400/40 text-purple-200 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
               >
-                <i className="fa-solid fa-calendar-days text-xs"></i>
+                <i className="fa-solid fa-calendar-days text-xs text-amber-400"></i>
                 <span>Book / Change Slot</span>
               </button>
 
@@ -699,7 +699,7 @@ export function BookingModal({
                   setShowAlreadySubmittedPopup(false);
                   setStep(1);
                 }}
-                className="bg-[#131C35] hover:bg-[#1A233D] text-gray-300 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="bg-purple-950 hover:bg-purple-900 text-slate-300 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
               >
                 <i className="fa-solid fa-pen-to-square text-xs"></i>
                 <span>Fill New Details</span>
@@ -711,19 +711,19 @@ export function BookingModal({
         <>
           {/* Step 1: Contact Form */}
           {step === 1 && (
-            <div className="bg-gradient-to-b from-[#141A2D] via-[#0F1629] to-[#0B1121] text-white border border-[#6366F1]/40 w-full max-w-md sm:max-w-lg rounded-3xl p-4 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative max-h-[92vh] overflow-y-auto font-sans my-auto">
-              <div className="flex items-center justify-between border-b border-[#2A3552] pb-3 mb-3">
+            <div className="bg-gradient-to-b from-[#2e1065] via-[#150430] to-[#0c021c] text-white border border-purple-400/40 w-full max-w-md sm:max-w-lg rounded-3xl p-4 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative max-h-[92vh] overflow-y-auto font-sans my-auto">
+              <div className="flex items-center justify-between border-b border-purple-500/20 pb-3 mb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="bg-[#6366F1]/20 border border-[#6366F1]/40 text-[#818CF8] text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                  <span className="bg-purple-600/30 border border-purple-400/40 text-gold-300 text-[10px] font-black px-2.5 py-0.5 rounded-full">
                     Step 1 of 3
                   </span>
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">
-                    Fast 30-Sec Booking
+                  <span className="text-[10px] sm:text-xs font-bold text-purple-200 uppercase tracking-wide">
+                    Diamond Boutique Mumbai
                   </span>
                 </div>
                 <button
                   onClick={handleReset}
-                  className="w-7 h-7 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm transition-colors cursor-pointer"
+                  className="w-7 h-7 rounded-full text-purple-300 hover:text-white hover:bg-purple-900/60 flex items-center justify-center text-sm transition-colors cursor-pointer"
                 >
                   <i className="fa-solid fa-xmark"></i>
                 </button>
@@ -731,52 +731,55 @@ export function BookingModal({
 
               <form onSubmit={handleStep1Submit} className="space-y-3.5 text-left">
                 <div className="text-center space-y-1">
-                  <h3 className="text-base sm:text-xl font-black text-white leading-snug">
-                    Claim Your 1-on-1 Strategy Session
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-amber-400 text-slate-950 flex items-center justify-center text-base font-bold mx-auto mb-1 shadow-md">
+                    <i className="fa-solid fa-gem"></i>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-black font-serif text-white leading-snug">
+                    Distributorship &amp; VIP Visit Request
                   </h3>
-                  <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
-                    Enter your details to reserve your custom business technology session
+                  <p className="text-[11px] sm:text-xs text-purple-200 font-medium">
+                    Hamare master stylists aur wholesale team se direct connect karein
                   </p>
                 </div>
 
                 {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    Full Name <span className="text-[#df7626]">*</span>
+                  <label className="block text-xs font-bold text-slate-200 mb-1">
+                    Aapka Pura Naam / Store Name <span className="text-amber-400">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     autoComplete="name"
-                    placeholder="Enter your full name"
+                    placeholder="Jaise: Ayesha Khan / Boutique Name"
                     value={contactInfo.fullName}
                     onChange={(e) => {
                       const capitalized = e.target.value.replace(/(^|\s)\S/g, (letter) => letter.toUpperCase());
                       setContactInfo({ ...contactInfo, fullName: capitalized });
                     }}
-                    className="w-full bg-[#0B1121] border border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626] rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors"
+                    className="w-full bg-[#150430] border border-purple-500/30 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-slate-400 shadow-inner outline-none transition-colors"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    Work Email <span className="text-[#df7626]">*</span>
+                  <label className="block text-xs font-bold text-slate-200 mb-1">
+                    Email Address <span className="text-amber-400">*</span>
                   </label>
                   <input
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="name@company.com"
+                    placeholder="name@gmail.com"
                     value={contactInfo.email}
                     onChange={(e) => {
                       setContactInfo({ ...contactInfo, email: e.target.value });
                       if (emailError) setEmailError(null);
                     }}
                     onBlur={handleEmailBlur}
-                    className={`w-full bg-[#0B1121] border ${
-                      emailError ? "border-red-500" : "border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626]"
-                    } rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors`}
+                    className={`w-full bg-[#150430] border ${
+                      emailError ? "border-red-500" : "border-purple-500/30 focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    } rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-slate-400 shadow-inner outline-none transition-colors`}
                   />
                   {emailError && (
                     <p className="text-red-400 font-bold text-xs mt-1 animate-pulse flex items-center space-x-1">
@@ -788,16 +791,16 @@ export function BookingModal({
 
                 {/* Phone Number with Country Code Dropdown */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    Phone Number <span className="text-[#df7626]">*</span>
+                  <label className="block text-xs font-bold text-slate-200 mb-1">
+                    WhatsApp Mobile Number <span className="text-amber-400">*</span>
                   </label>
-                  <div className={`flex items-center bg-[#0B1121] border ${
-                    phoneError ? "border-red-500" : "border-[#2A3552] focus-within:border-[#df7626] focus-within:ring-1 focus-within:ring-[#df7626]"
+                  <div className={`flex items-center bg-[#150430] border ${
+                    phoneError ? "border-red-500" : "border-purple-500/30 focus-within:border-amber-400 focus-within:ring-1 focus-within:ring-amber-400"
                   } rounded-xl overflow-hidden shadow-inner`}>
                     <select
                       value={contactInfo.countryCode}
                       onChange={(e) => setContactInfo({ ...contactInfo, countryCode: e.target.value })}
-                      className="bg-[#0D1426] text-white text-xs sm:text-sm font-bold border-r border-[#2A3552] px-2.5 py-2.5 sm:py-3 outline-none cursor-pointer focus:bg-[#131C35]"
+                      className="bg-[#2e1065] text-white text-xs sm:text-sm font-bold border-r border-purple-500/30 px-2.5 py-2.5 sm:py-3 outline-none cursor-pointer focus:bg-[#3b0764]"
                     >
                       <option value="+91">🇮🇳 +91 (IN)</option>
                       <option value="+1">🇺🇸 +1 (US)</option>
@@ -817,7 +820,7 @@ export function BookingModal({
                         if (phoneError) setPhoneError(null);
                       }}
                       onBlur={handlePhoneBlur}
-                      className="w-full px-3 py-2.5 sm:py-3 text-sm text-white bg-transparent placeholder-gray-500 focus:outline-none font-mono tracking-wider"
+                      className="w-full px-3 py-2.5 sm:py-3 text-sm text-white bg-transparent placeholder-slate-400 focus:outline-none font-mono tracking-wider"
                     />
                   </div>
                   {phoneError && (
@@ -831,9 +834,9 @@ export function BookingModal({
                 <button
                   type="submit"
                   disabled={isSubmittingStep1}
-                  className="w-full bg-gradient-to-r from-[#df7626] via-[#ea580c] to-[#d97706] hover:from-[#ea580c] hover:to-[#df7626] text-white py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base flex flex-col items-center justify-center space-y-0.5 shadow-[0_8px_25px_-5px_rgba(223,118,38,0.5)] border-t border-white/20 border-b-4 border-[#9a3412] active:border-b-0 active:translate-y-0.5 overflow-hidden transition-all cursor-pointer mt-4 disabled:opacity-50"
+                  className="w-full bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:brightness-110 text-slate-950 py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base flex flex-col items-center justify-center space-y-0.5 shadow-[0_8px_25px_-5px_rgba(245,158,11,0.5)] active:translate-y-0.5 overflow-hidden transition-all cursor-pointer mt-4 disabled:opacity-50"
                 >
-                  <div className="text-sm sm:text-base font-black text-white flex items-center justify-center space-x-2 uppercase tracking-wide">
+                  <div className="text-sm sm:text-base font-black text-slate-950 flex items-center justify-center space-x-2 uppercase tracking-wide">
                     {isSubmittingStep1 ? (
                       <>
                         <i className="fa-solid fa-circle-notch fa-spin text-sm"></i>
@@ -841,13 +844,13 @@ export function BookingModal({
                       </>
                     ) : (
                       <>
-                        <span>CONTINUE TO SELECT SLOT</span>
+                        <span>CONTINUE TO PREFERENCES</span>
                         <i className="fa-solid fa-arrow-right text-xs sm:text-sm"></i>
                       </>
                     )}
                   </div>
-                  <div className="text-[10px] sm:text-xs font-extrabold text-amber-200">
-                    ⚡ 100% Free Strategy Session • No Sales Pitch
+                  <div className="text-[10px] sm:text-xs font-extrabold text-slate-900">
+                    ⚡ 100% Original Pakistani Suits • Direct Wholesale &amp; Retail
                   </div>
                 </button>
               </form>
@@ -856,20 +859,20 @@ export function BookingModal({
 
           {/* Step 2: Qualification Questionnaire */}
           {step === 2 && (
-            <div className="bg-[#0F1629] text-white border border-[#2A3552] w-full max-w-xl rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl relative max-h-[92vh] overflow-y-auto font-sans flex flex-col justify-between my-auto">
+            <div className="bg-gradient-to-b from-[#2e1065] via-[#150430] to-[#0c021c] text-white border border-purple-400/40 w-full max-w-xl rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl relative max-h-[92vh] overflow-y-auto font-sans flex flex-col justify-between my-auto">
               <div>
-                <div className="flex items-center justify-between border-b border-[#2A3552] pb-2.5 mb-3">
+                <div className="flex items-center justify-between border-b border-purple-500/20 pb-2.5 mb-3">
                   <div className="flex items-center space-x-2">
-                    <span className="bg-[#6366F1]/20 border border-[#6366F1]/40 text-[#818CF8] text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                    <span className="bg-purple-600/30 border border-purple-400/40 text-gold-300 text-[10px] font-black px-2.5 py-0.5 rounded-full">
                       Step 2 • Q{activeQIndex + 1} of {qualificationQuestions.length}
                     </span>
-                    <h3 className="text-xs sm:text-sm font-bold text-white tracking-wide truncate max-w-[200px] sm:max-w-xs">
+                    <h3 className="text-xs sm:text-sm font-bold text-purple-200 tracking-wide truncate max-w-[200px] sm:max-w-xs">
                       {activeCampaign.subtitle}
                     </h3>
                   </div>
                   <button
                     onClick={handleReset}
-                    className="w-7 h-7 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm cursor-pointer"
+                    className="w-7 h-7 rounded-full text-purple-300 hover:text-white hover:bg-purple-900/60 flex items-center justify-center text-sm cursor-pointer"
                   >
                     <i className="fa-solid fa-xmark"></i>
                   </button>
@@ -878,11 +881,11 @@ export function BookingModal({
                 {(() => {
                   const currentQ = qualificationQuestions[activeQIndex];
                   if (!currentQ) return null;
-                  const isGrid = currentQ.options.length > 5;
+                  const isGrid = currentQ.options.length > 4;
                   return (
                     <div className="space-y-3 pt-1">
-                      <div className="text-sm sm:text-base md:text-lg font-bold text-gray-100 flex items-start space-x-2">
-                        <span className="text-[#df7626] font-extrabold flex-shrink-0">{currentQ.num} ➔</span>
+                      <div className="text-sm sm:text-base md:text-lg font-bold font-serif text-slate-100 flex items-start space-x-2">
+                        <span className="text-amber-400 font-extrabold flex-shrink-0">{currentQ.num} ➔</span>
                         <span>{currentQ.question}</span>
                       </div>
 
@@ -901,12 +904,12 @@ export function BookingModal({
                               }}
                               className={`w-full text-left p-2.5 sm:p-3 rounded-xl border flex items-center justify-between transition-all duration-200 cursor-pointer ${
                                 isSelected
-                                  ? "bg-[#6366F1]/20 border-2 border-[#6366F1] text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-                                  : "bg-[#131C35] border-[#2A3552] text-gray-200 hover:border-[#6366F1]/50 hover:bg-[#1A233D]"
+                                  ? "bg-purple-600/40 border-2 border-amber-400 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                                  : "bg-[#150430] border-purple-500/30 text-slate-200 hover:border-amber-400/60 hover:bg-purple-950"
                               }`}
                             >
                               <span className="text-xs sm:text-sm font-semibold">{opt.label}</span>
-                              <span className="w-5 h-5 rounded-full border border-[#2A3552] text-gray-400 text-[10px] font-mono flex items-center justify-center bg-[#0B1121] flex-shrink-0 ml-2">
+                              <span className="w-5 h-5 rounded-full border border-purple-400/40 text-gold-300 text-[10px] font-mono flex items-center justify-center bg-[#0c021c] flex-shrink-0 ml-2">
                                 {opt.key}
                               </span>
                             </button>
@@ -918,13 +921,13 @@ export function BookingModal({
                 })()}
               </div>
 
-              <div className="pt-4 border-t border-[#2A3552] flex items-center justify-between mt-5">
+              <div className="pt-4 border-t border-purple-500/20 flex items-center justify-between mt-5">
                 <div className="flex items-center space-x-3">
                   {activeQIndex === qualificationQuestions.length - 1 ? (
                     <button
                       type="button"
                       onClick={handleStep2Submit}
-                      className="bg-gradient-to-r from-[#df7626] to-[#ea580c] text-white font-extrabold px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-xs sm:text-sm uppercase tracking-wide flex items-center space-x-2 shadow-lg cursor-pointer"
+                      className="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-extrabold px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-xs sm:text-sm uppercase tracking-wide flex items-center space-x-2 shadow-lg cursor-pointer"
                     >
                       <span>Submit</span>
                       <i className="fa-solid fa-chevron-right text-xs"></i>
@@ -933,13 +936,13 @@ export function BookingModal({
                     <button
                       type="button"
                       onClick={() => setActiveQIndex(activeQIndex + 1)}
-                      className="bg-gradient-to-r from-[#df7626] to-[#ea580c] text-white font-bold px-4 py-1.5 sm:py-2 rounded-full text-xs flex items-center space-x-1.5 shadow cursor-pointer"
+                      className="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold px-4 py-1.5 sm:py-2 rounded-full text-xs flex items-center space-x-1.5 shadow cursor-pointer"
                     >
                       <span>OK</span>
                       <i className="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                   )}
-                  <span className="text-[11px] text-gray-400 font-mono hidden sm:inline">
+                  <span className="text-[11px] text-purple-300 font-mono hidden sm:inline">
                     press <span className="text-white font-bold">Enter ↵</span>
                   </span>
                 </div>
@@ -949,7 +952,7 @@ export function BookingModal({
                     type="button"
                     disabled={activeQIndex === 0}
                     onClick={() => setActiveQIndex(Math.max(0, activeQIndex - 1))}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#df7626]/20 border border-[#df7626]/40 text-[#df7626] hover:bg-[#df7626] hover:text-white flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-900/50 border border-purple-400/40 text-gold-300 hover:bg-purple-700 hover:text-white flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   >
                     <i className="fa-solid fa-chevron-up text-xs"></i>
                   </button>
@@ -957,7 +960,7 @@ export function BookingModal({
                     type="button"
                     disabled={activeQIndex === qualificationQuestions.length - 1}
                     onClick={() => setActiveQIndex(Math.min(qualificationQuestions.length - 1, activeQIndex + 1))}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#df7626]/20 border border-[#df7626]/40 text-[#df7626] hover:bg-[#df7626] hover:text-white flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-900/50 border border-purple-400/40 text-gold-300 hover:bg-purple-700 hover:text-white flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   >
                     <i className="fa-solid fa-chevron-down text-xs"></i>
                   </button>
@@ -968,74 +971,74 @@ export function BookingModal({
 
           {/* Step 3: Calendar & Time Slots */}
           {step === 3 && (
-            <div className="bg-[#0B1121] text-white border border-[#2A3552] w-full max-w-lg rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto font-sans space-y-3 my-auto">
-              <div className="flex items-center justify-between border-b border-[#2A3552] pb-2.5">
-                <p className="text-xs sm:text-sm font-bold text-gray-300">
-                  Select date &amp; time for your Strategy Call
+            <div className="bg-gradient-to-b from-[#2e1065] via-[#150430] to-[#0c021c] text-white border border-purple-400/40 w-full max-w-lg rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto font-sans space-y-3 my-auto">
+              <div className="flex items-center justify-between border-b border-purple-500/20 pb-2.5">
+                <p className="text-xs sm:text-sm font-bold text-slate-200">
+                  Select date &amp; time for Store Visit / Consultation
                 </p>
                 <button
                   onClick={handleReset}
-                  className="w-7 h-7 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm cursor-pointer"
+                  className="w-7 h-7 rounded-full text-purple-300 hover:text-white hover:bg-purple-900/60 flex items-center justify-center text-sm cursor-pointer"
                 >
                   <i className="fa-solid fa-xmark"></i>
                 </button>
               </div>
 
-              <div className="bg-[#0F1629] border border-[#2A3552] rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3.5 shadow-xl">
-                <div className="flex items-center justify-between border-b border-[#2A3552] pb-2.5">
+              <div className="bg-[#150430] border border-purple-500/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3.5 shadow-xl">
+                <div className="flex items-center justify-between border-b border-purple-500/20 pb-2.5">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#df7626] shadow">
-                      <img src="/founder.png" alt="Selflance Team" className="w-full h-full object-cover" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-amber-400 text-slate-950 flex items-center justify-center font-bold shadow">
+                      <i className="fa-solid fa-gem"></i>
                     </div>
                     <div>
-                      <h4 className="text-xs sm:text-base font-bold text-white leading-tight">
-                        Your Technology Strategy Session
+                      <h4 className="text-xs sm:text-base font-bold font-serif text-white leading-tight">
+                        Diamond Boutique Store Appointment
                       </h4>
-                      <p className="text-[11px] text-[#df7626] font-semibold">Selflance Strategy Team</p>
+                      <p className="text-[11px] text-gold-300 font-semibold">Attar Gali, Mumbai • Master Stylist</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-1 bg-[#df7626]/10 border border-[#df7626]/30 px-2.5 py-1 rounded-full text-[10px] sm:text-xs text-[#df7626] font-mono font-bold">
+                  <div className="flex items-center space-x-1 bg-purple-500/20 border border-purple-400/30 px-2.5 py-1 rounded-full text-[10px] sm:text-xs text-gold-300 font-mono font-bold">
                     <i className="fa-regular fa-clock"></i>
-                    <span>45 min</span>
+                    <span>30 min</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-gray-400 px-1">
+                <div className="flex items-center justify-between text-[11px] text-purple-200 px-1">
                   <div className="flex items-center space-x-1.5 font-mono">
-                    <i className="fa-solid fa-globe text-[#df7626]"></i>
-                    <span>Asia/Calcutta (GMT+5:30)</span>
+                    <i className="fa-solid fa-location-dot text-amber-400"></i>
+                    <span>Attar Gali, Mumbai (IST GMT+5:30)</span>
                   </div>
                 </div>
 
                 {/* Calendar Card */}
-                <div className="border border-[#2A3552] rounded-xl sm:rounded-2xl p-3 bg-[#131C35] space-y-3">
+                <div className="border border-purple-500/30 rounded-xl sm:rounded-2xl p-3 bg-[#0c021c] space-y-3">
                   <div className="flex items-center justify-between text-xs font-extrabold text-white px-1">
                     <button
                       type="button"
                       disabled={isPrevMonthDisabled}
                       onClick={handlePrevMonth}
-                      className="px-2.5 py-1 rounded-lg bg-[#0B1121] border border-[#2A3552] hover:bg-[#1E293B] text-[#df7626] flex items-center space-x-1 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-purple-950 border border-purple-500/30 hover:bg-purple-900 text-gold-300 flex items-center space-x-1 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                     >
                       <i className="fa-solid fa-chevron-left text-[10px]"></i>
                       <span>Prev</span>
                     </button>
 
-                    <span className="text-sm font-black text-white tracking-wide bg-[#0B1121] px-3 py-1 rounded-lg border border-[#2A3552]">
+                    <span className="text-sm font-black text-white tracking-wide bg-purple-950 px-3 py-1 rounded-lg border border-purple-500/30">
                       {MONTH_NAMES[currentMonthIndex]} {currentYear}
                     </span>
 
                     <button
                       type="button"
                       onClick={handleNextMonth}
-                      className="px-2.5 py-1 rounded-lg bg-[#0B1121] border border-[#2A3552] hover:bg-[#1E293B] text-[#df7626] flex items-center space-x-1 transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-purple-950 border border-purple-500/30 hover:bg-purple-900 text-gold-300 flex items-center space-x-1 transition-colors cursor-pointer"
                     >
                       <span>Next</span>
                       <i className="fa-solid fa-chevron-right text-[10px]"></i>
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-7 text-center text-[9px] sm:text-[10px] font-bold text-gray-400 border-b border-[#2A3552] pb-1">
+                  <div className="grid grid-cols-7 text-center text-[9px] sm:text-[10px] font-bold text-purple-300 border-b border-purple-500/20 pb-1">
                     <span>SUN</span>
                     <span>MON</span>
                     <span>TUE</span>
@@ -1062,10 +1065,10 @@ export function BookingModal({
                           onClick={() => setSelectedDay(dayNum)}
                           className={`p-1.5 sm:p-2 rounded-xl transition-all text-xs font-bold cursor-pointer ${
                             isPast
-                              ? "text-gray-600 bg-[#0B1121]/40 opacity-30 pointer-events-none line-through"
+                              ? "text-slate-600 bg-purple-950/20 opacity-30 pointer-events-none line-through"
                               : isSelected
-                              ? "bg-gradient-to-r from-[#df7626] to-[#ea580c] text-white font-black shadow-[0_0_15px_rgba(223,118,38,0.4)] scale-105"
-                              : "text-gray-200 hover:bg-[#1E293B] hover:text-[#df7626]"
+                              ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-[0_0_15px_rgba(245,158,11,0.4)] scale-105"
+                              : "text-slate-200 hover:bg-purple-900/60 hover:text-gold-300"
                           }`}
                         >
                           {dayNum}
@@ -1077,9 +1080,9 @@ export function BookingModal({
 
                 {/* Time Slot Picker */}
                 <div className="space-y-2 pt-1">
-                  <div className="flex items-center justify-between text-xs font-bold text-gray-200">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-200">
                     <span>📅 {formattedBookingDate}</span>
-                    <span className="text-[#df7626] text-[10px] uppercase font-mono">Select Time Slot</span>
+                    <span className="text-gold-400 text-[10px] uppercase font-mono">Select Time Slot</span>
                   </div>
 
                   {(() => {
@@ -1090,7 +1093,7 @@ export function BookingModal({
                             <i className="fa-solid fa-ban"></i>
                             <span>This date is marked as booked / unavailable.</span>
                           </p>
-                          <p className="text-[11px] text-gray-400">
+                          <p className="text-[11px] text-slate-400">
                             Please select another date from the calendar above.
                           </p>
                         </div>
@@ -1103,12 +1106,12 @@ export function BookingModal({
 
                     if (activeSlots.length === 0) {
                       return (
-                        <div className="p-3 text-center rounded-xl bg-[#131C35] border border-[#2A3552] space-y-1.5 my-1">
-                          <p className="text-xs text-[#df7626] font-bold flex items-center justify-center space-x-1">
+                        <div className="p-3 text-center rounded-xl bg-purple-950/60 border border-purple-500/30 space-y-1.5 my-1">
+                          <p className="text-xs text-gold-300 font-bold flex items-center justify-center space-x-1">
                             <span>⏰</span>
                             <span>All time slots for today have passed.</span>
                           </p>
-                          <p className="text-[11px] text-gray-400">
+                          <p className="text-[11px] text-slate-400">
                             Please select tomorrow or an upcoming date from the calendar above.
                           </p>
                         </div>
@@ -1128,8 +1131,8 @@ export function BookingModal({
                               onClick={() => handleSelectSlot(time)}
                               className={`w-full p-2.5 rounded-xl text-xs font-bold transition-all shadow cursor-pointer ${
                                 isBooked
-                                  ? "bg-[#0B1121] border border-[#2A3552] text-gray-600 line-through opacity-50 cursor-not-allowed flex items-center justify-center space-x-1"
-                                  : "bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#df7626] text-white font-extrabold hover:scale-[1.02] active:scale-95 flex items-center justify-center space-x-1"
+                                  ? "bg-purple-950 border border-purple-500/20 text-slate-500 line-through opacity-50 cursor-not-allowed flex items-center justify-center space-x-1"
+                                  : "bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-extrabold hover:scale-[1.02] active:scale-95 flex items-center justify-center space-x-1"
                               }`}
                             >
                               <i className="fa-regular fa-clock text-[11px]"></i>
@@ -1147,29 +1150,29 @@ export function BookingModal({
 
           {/* Step 4: Final Success Confirmation */}
           {step === 4 && (
-            <div className="bg-[#0F1629] text-white border border-emerald-500/40 w-full max-w-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl relative text-center space-y-4 font-sans my-auto">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 flex items-center justify-center text-2xl sm:text-3xl mx-auto shadow-lg">
+            <div className="bg-gradient-to-b from-[#2e1065] via-[#150430] to-[#0c021c] text-white border border-green-500/40 w-full max-w-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl relative text-center space-y-4 font-sans my-auto">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-green-500/20 border-2 border-green-500 text-green-400 flex items-center justify-center text-2xl sm:text-3xl mx-auto shadow-lg">
                 ✓
               </div>
 
               <div>
-                <h4 className="text-lg sm:text-xl font-black text-white">
+                <h4 className="text-lg sm:text-xl font-black font-serif text-white">
                   Appointment Slot Booked Successfully! 🎉
                 </h4>
-                <p className="text-xs text-[#df7626] font-bold mt-1">
+                <p className="text-xs text-gold-300 font-bold mt-1">
                   {formattedBookingDate} at {selectedTimeSlot}
                 </p>
               </div>
 
-              <div className="bg-[#0B1121] border border-[#2A3552] rounded-2xl p-3.5 text-left text-xs text-gray-300 space-y-1 font-mono">
-                <div><span className="text-gray-500">Name:</span> {contactInfo.fullName || "User"}</div>
-                <div><span className="text-gray-500">Phone:</span> {contactInfo.countryCode} {contactInfo.phone || "N/A"}</div>
-                <div><span className="text-gray-500">Campaign:</span> {activeCampaign.title}</div>
-                <div><span className="text-gray-500">Booked Slot:</span> {formattedBookingDate} ({selectedTimeSlot})</div>
+              <div className="bg-[#150430] border border-purple-500/30 rounded-2xl p-3.5 text-left text-xs text-slate-200 space-y-1 font-mono">
+                <div><span className="text-purple-400">Name:</span> {contactInfo.fullName || "Customer"}</div>
+                <div><span className="text-purple-400">Phone:</span> {contactInfo.countryCode} {contactInfo.phone || "N/A"}</div>
+                <div><span className="text-purple-400">Destination:</span> Diamond Boutique (Attar Gali, Mumbai)</div>
+                <div><span className="text-purple-400">Booked Slot:</span> {formattedBookingDate} ({selectedTimeSlot})</div>
                 {generatedMeetUrl && (
-                  <div className="pt-1.5 border-t border-[#2A3552] text-indigo-300">
-                    <span className="text-gray-500 block">Google Meet Link:</span>
-                    <a href={generatedMeetUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline text-indigo-400 break-all hover:text-white">
+                  <div className="pt-1.5 border-t border-purple-500/20 text-gold-300">
+                    <span className="text-purple-400 block">Consultation Link:</span>
+                    <a href={generatedMeetUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline text-gold-400 break-all hover:text-white">
                       🎥 {generatedMeetUrl}
                     </a>
                   </div>
@@ -1181,7 +1184,7 @@ export function BookingModal({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleReset}
-                className="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 sm:py-3.5 px-4 rounded-xl text-xs sm:text-sm uppercase tracking-wide shadow-xl transition-transform active:scale-98 cursor-pointer"
+                className="block w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 sm:py-3.5 px-4 rounded-xl text-xs sm:text-sm uppercase tracking-wide shadow-xl transition-transform active:scale-98 cursor-pointer"
               >
                 <i className="fa-brands fa-whatsapp mr-2 text-base"></i>
                 Confirm Slot On WhatsApp &amp; Finish
@@ -1196,14 +1199,14 @@ export function BookingModal({
                     setIsReselectingSlot(true);
                     setStep(3);
                   }}
-                  className="flex-1 bg-[#df7626]/20 hover:bg-[#df7626]/30 border border-[#df7626]/40 text-[#df7626] font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+                  className="flex-1 bg-purple-900/50 hover:bg-purple-800 border border-purple-400/40 text-gold-300 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
                 >
-                  <i className="fa-solid fa-calendar-pen text-xs"></i>
+                  <i className="fa-solid fa-calendar-days text-xs"></i>
                   <span>Change / Reselect Slot</span>
                 </button>
                 <button
                   onClick={handleReset}
-                  className="bg-[#131C35] hover:bg-[#1A233D] text-gray-300 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors cursor-pointer"
+                  className="bg-purple-950 hover:bg-purple-900 text-slate-300 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors cursor-pointer"
                 >
                   <span>Close</span>
                 </button>
