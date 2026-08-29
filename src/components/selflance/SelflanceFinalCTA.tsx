@@ -21,23 +21,34 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
           <div className="flex justify-center mb-5">
             <div className="inline-flex items-center gap-2 bg-[#6366F1]/10 border border-[#6366F1]/30 rounded-full px-4 py-1.5 text-[#818CF8] text-[10px] sm:text-xs font-extrabold uppercase tracking-widest shadow-[0_0_15px_rgba(99,102,241,0.2)]">
               <span className="w-2 h-2 rounded-full bg-[#6366F1] animate-ping"></span>
-              1-on-1 Strategy Session
+              {isUS ? "Start Building" : "Take The Next Step"}
             </div>
           </div>
 
           {/* Headline */}
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 max-w-3xl mx-auto tracking-tight">
-            Ready To Build Technology That <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#df7626] via-amber-300 to-yellow-400 drop-shadow">
-              {isUS ? "Moves Your Business Forward?" : "Actually Grows Your Business?"}
-            </span>
+            {isUS ? (
+              <>
+                Stop Wondering How to Build It. <br className="hidden sm:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#df7626] via-amber-300 to-yellow-400 drop-shadow">
+                  Let&apos;s Figure It Out.
+                </span>
+              </>
+            ) : (
+              <>
+                Your Idea Deserves More Than a Quote. <br className="hidden sm:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#df7626] via-amber-300 to-yellow-400 drop-shadow">
+                  It Deserves a Plan.
+                </span>
+              </>
+            )}
           </h2>
 
           {/* Subtitle */}
           <p className="text-gray-300 text-xs sm:text-base max-w-2xl mx-auto leading-relaxed mb-8 font-medium">
             {isUS
-              ? "Book your Business Technology Strategy Session and discover how the right digital systems can support your next stage of growth."
-              : "Book Your Business Technology Strategy Session Today. Let's understand your business... Identify growth opportunities... Aur milkar ek scalable technology roadmap banayein."}
+              ? "Tell us what you're building. We'll help you determine the next step and map out the right technology architecture."
+              : "Tell us what you're building. We'll understand your requirements, identify the right development approach and help you decide what to do next."}
           </p>
 
           {/* Custom Executive CTA Button */}
@@ -56,7 +67,9 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
                 </svg>
               </div>
 
-              <span className="relative z-10 tracking-wide">Book My Strategy Session</span>
+              <span className="relative z-10 tracking-wide">
+                {isUS ? "Start My Project Assessment →" : "Tell Us About My Project →"}
+              </span>
 
               {/* Arrow icon */}
               <svg className="w-5 h-5 text-white/90 transform group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,16 +80,12 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
             {/* Live Availability Indicator */}
             <div className="flex items-center gap-2 text-[11px] sm:text-xs text-gray-300 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              <span>Slots Open For This Week &bull; No Obligation</span>
+              <span>
+                {isUS
+                  ? "No technical expertise required • Takes 2 minutes"
+                  : "2-minute project assessment • No technical knowledge required"}
+              </span>
             </div>
-          </div>
-
-          {/* Scarcity / Guarantee Pill */}
-          <div className="inline-flex items-center justify-center gap-2 text-[10px] sm:text-xs text-amber-300 font-semibold tracking-wide bg-amber-500/10 px-4 py-2 rounded-full border border-amber-500/30 shadow-sm max-w-full">
-            <svg className="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
-            </svg>
-            <span className="truncate">Limited consultation slots available every week.</span>
           </div>
         </div>
       </section>
@@ -93,7 +102,7 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
               />
             </div>
             <p className="text-[#818CF8] text-xs sm:text-sm font-semibold max-w-md">
-              We Engineer Technology That Helps Businesses Scale Faster.
+              We Engineer Digital Products That Help Businesses Scale.
             </p>
             <div className="mt-2 space-y-0.5">
               <p className="text-gray-300 text-xs font-semibold">
@@ -110,7 +119,7 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
               onClick={onBookClick}
               className="flex items-center gap-2 bg-[#df7626]/20 px-4 py-2 rounded-full border border-[#df7626]/40 text-[#df7626] text-xs font-bold hover:bg-[#df7626]/30 transition-colors shadow-sm cursor-pointer"
             >
-              <span>Book Strategy Call</span>
+              <span>{isUS ? "Start Assessment" : "Tell Us Your Project"}</span>
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
               </svg>
@@ -120,7 +129,7 @@ export function SelflanceFinalCTA({ isUS = false, onBookClick }: SelflanceFinalC
 
         <div className="max-w-5xl mx-auto border-t border-gray-800/60 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-gray-500 text-[11px] gap-2">
           <span>&copy; {new Date().getFullYear()} Selflance Technologies Private Limited. All rights reserved.</span>
-          <span>Technology &bull; Automation &bull; Digital Transformation</span>
+          <span>Web Apps &bull; Mobile Apps &bull; Custom Software &bull; UI/UX</span>
         </div>
       </footer>
     </>

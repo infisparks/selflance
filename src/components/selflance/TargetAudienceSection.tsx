@@ -8,40 +8,35 @@ interface TargetAudienceSectionProps {
 
 export function TargetAudienceSection({ isUS = false }: TargetAudienceSectionProps) {
   const perfectIN = [
-    "Growing Businesses & Enterprises",
-    "Multi-branch & Location Companies",
-    "Manufacturers & B2B Businesses",
-    "Education & Healthcare Institutions",
-    "Real Estate & Retail Brands",
-    "Companies looking to automate & scale operations",
+    "You have a serious business idea",
+    "You want a custom app or software",
+    "You're building an MVP",
+    "You need to modernize an existing system",
+    "You need CRM / ERP / business automation",
+    "You want a long-term technology partner",
   ];
 
   const perfectUS = [
-    "Established Businesses & Enterprises",
-    "Multi-location Companies & Chains",
-    "Manufacturers & B2B Enterprises",
-    "Healthcare & Life Sciences Groups",
-    "Educational Institutions & Academies",
-    "Real Estate & Property Developers",
-    "Retail Brands & E-commerce",
-    "Businesses Planning Digital Transformation",
+    "You're building a serious business or product",
+    "You need a custom application or software",
+    "You're launching an MVP",
+    "You need to modernize an existing product",
+    "You need custom business software",
+    "You want a development partner rather than a one-off coder",
   ];
 
   const notFitIN = [
-    "College / Student Projects",
-    "Low-budget standard website seekers",
-    "₹10k - ₹20k app development requests",
-    "Cheap freelancer hunting",
-    "Zero long-term vision",
+    "You're only looking for the cheapest developer",
+    "You need a ₹5,000–₹10,000 basic website",
+    "You're looking for a college / student project",
+    "You haven't decided whether you actually want to build the product",
   ];
 
   const notFitUS = [
-    "Students & Academic Projects",
-    "College Prototypes",
-    "Budget-Only Website Requests",
-    "Quick $500 App Demands",
-    "Freelance Developer Hiring",
-    "Lowest-Price Bargain Hunting",
+    "You're choosing purely on the lowest price",
+    "You need a simple $100–$200 website",
+    "You're looking for a student / college project",
+    "You're not serious about building the product",
   ];
 
   const perfectList = isUS ? perfectUS : perfectIN;
@@ -57,16 +52,27 @@ export function TargetAudienceSection({ isUS = false }: TargetAudienceSectionPro
         <div className="flex justify-center sm:justify-start mb-4">
           <div className="inline-flex items-center gap-2 bg-[#6366F1]/10 border border-[#6366F1]/20 rounded-full px-3 py-1 text-[#818CF8] text-[10px] sm:text-xs font-bold uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-[#6366F1] animate-ping"></span>
-            Eligibility Check
+            Project Qualification
           </div>
         </div>
 
         {/* Heading */}
         <h2 className="text-2xl sm:text-4xl md:text-4xl font-extrabold text-white text-center sm:text-left leading-snug sm:leading-tight mb-8">
-          Who This Consultation{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366F1] via-[#A855F7] to-[#df7626]">
-            Is Designed For
-          </span>
+          {isUS ? (
+            <>
+              Is This a{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366F1] via-[#A855F7] to-[#df7626]">
+                Good Fit?
+              </span>
+            </>
+          ) : (
+            <>
+              Is Selflance Right For{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366F1] via-[#A855F7] to-[#df7626]">
+                Your Project?
+              </span>
+            </>
+          )}
         </h2>
 
         {/* Two Column Grid */}
@@ -78,7 +84,7 @@ export function TargetAudienceSection({ isUS = false }: TargetAudienceSectionPro
                 ✓
               </div>
               <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                This Is A <span className="text-emerald-400">Perfect Fit</span> If:
+                We&apos;re a <span className="text-emerald-400">Good Fit</span> If:
               </h3>
             </div>
             <ul className="space-y-3 text-xs sm:text-sm text-gray-200 font-medium">
@@ -98,7 +104,7 @@ export function TargetAudienceSection({ isUS = false }: TargetAudienceSectionPro
                 ✕
               </div>
               <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                This Is <span className="text-red-400">NOT For You</span> If:
+                Probably <span className="text-red-400">Not A Fit</span> If:
               </h3>
             </div>
             <ul className="space-y-3 text-xs sm:text-sm text-gray-300 font-medium">

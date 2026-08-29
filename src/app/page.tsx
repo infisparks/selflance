@@ -9,11 +9,9 @@ import { GrowthBottleneckSection } from "@/components/selflance/GrowthBottleneck
 import { GrowthPartnerSection } from "@/components/selflance/GrowthPartnerSection";
 import { WhatWeBuildSection } from "@/components/selflance/WhatWeBuildSection";
 import { PortfolioShowcaseSection } from "@/components/selflance/PortfolioShowcaseSection";
-import { SituationCheckSection } from "@/components/selflance/SituationCheckSection";
-import { TargetAudienceSection } from "@/components/selflance/TargetAudienceSection";
-import { DeliverablesSection } from "@/components/selflance/DeliverablesSection";
 import { WhyChooseUsSection } from "@/components/selflance/WhyChooseUsSection";
 import { DevelopmentProcessSection } from "@/components/selflance/DevelopmentProcessSection";
+import { TargetAudienceSection } from "@/components/selflance/TargetAudienceSection";
 import { BeforeYouBookSection } from "@/components/selflance/BeforeYouBookSection";
 import { SelflanceFinalCTA } from "@/components/selflance/SelflanceFinalCTA";
 import { StickyMobileCTA } from "@/components/StickyMobileCTA";
@@ -229,7 +227,7 @@ export default function Home({
       </Suspense>
 
       {/* Fixed Navigation Header with CTA */}
-      <SelflanceHeader onBookClick={handleOpenBooking} />
+      <SelflanceHeader isUS={isUS} onBookClick={handleOpenBooking} />
 
       {/* Section 1: Hero Section */}
       <SelflanceHero
@@ -238,43 +236,37 @@ export default function Home({
         onVideoClick={handleOpenVideo}
       />
 
-      {/* Section 2: The Growth Bottleneck */}
-      <GrowthBottleneckSection isUS={isUS} />
+      {/* Section 2: Hit the Pain */}
+      <GrowthBottleneckSection isUS={isUS} onBookClick={handleOpenBooking} />
 
-      {/* Section 3: Technology Growth Partner / Our Philosophy */}
+      {/* Section 3: Position Selflance (One Team / One Development Partner) */}
+      <WhatWeBuildSection isUS={isUS} />
+
+      {/* Section 4: Outcome & Business Strategy */}
       <GrowthPartnerSection isUS={isUS} />
 
-      {/* Section 4: What We Build */}
-      <WhatWeBuildSection />
-
-      {/* Section 4.5: Featured Portfolio & Design Showcase */}
+      {/* Section 5: Proof / Portfolio Showcase (Preserved) */}
       <PortfolioShowcaseSection />
 
-      {/* Section 5: Company Situation Check */}
-      <SituationCheckSection isUS={isUS} />
-
-      {/* Section 6: Target Audience Fit */}
-      <TargetAudienceSection isUS={isUS} />
-
-      {/* Section 7: Strategy Session Deliverables */}
-      <DeliverablesSection isUS={isUS} />
-
-      {/* Section 8: Why Businesses Choose Selflance */}
+      {/* Section 6: Why Businesses Choose Selflance / Trust */}
       <WhyChooseUsSection isUS={isUS} />
 
-      {/* Section 9: Our Development Process */}
-      <DevelopmentProcessSection />
+      {/* Section 7: Our Development Process (7 Phases) */}
+      <DevelopmentProcessSection isUS={isUS} />
 
-      {/* Section 10: Before You Book Notice */}
-      <BeforeYouBookSection isUS={isUS} />
+      {/* Section 8: Qualification (Is Selflance Right For Your Project?) */}
+      <TargetAudienceSection isUS={isUS} />
 
-      {/* Section 11: Final CTA Banner & Footer */}
+      {/* Section 9: Offer / Assessment Bridge */}
+      <BeforeYouBookSection isUS={isUS} onBookClick={handleOpenBooking} />
+
+      {/* Section 10: Final CTA Banner & Footer */}
       <SelflanceFinalCTA isUS={isUS} onBookClick={handleOpenBooking} />
 
       {/* Fixed Floating CTA Bar (Appears upon scroll) */}
-      <StickyMobileCTA onBookClick={handleOpenBooking} />
+      <StickyMobileCTA isUS={isUS} onBookClick={handleOpenBooking} />
 
-      {/* Booking Modal */}
+      {/* Booking / Assessment Modal */}
       <BookingModal
         isOpen={bookingConfig.isOpen}
         onClose={handleCloseBooking}

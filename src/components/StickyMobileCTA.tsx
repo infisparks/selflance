@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 
-export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
+export function StickyMobileCTA({ isUS = false, onBookClick }: { isUS?: boolean; onBookClick: () => void }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show sticky CTA once user scrolls past 240px (past top hero section)
       if (window.scrollY > 240) {
         setIsVisible(true);
       } else {
@@ -16,7 +15,7 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -41,11 +40,11 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
           <div className="text-left leading-tight overflow-hidden">
             <div className="flex items-center space-x-1.5">
               <span className="text-[10px] sm:text-xs font-black text-amber-400 uppercase tracking-widest truncate">
-                ⚡ Free 30-Min Strategy Call
+                ⚡ 2-Min Project Assessment
               </span>
             </div>
             <p className="text-xs sm:text-sm font-extrabold text-white truncate">
-              Ready To Scale Your Tech?
+              {isUS ? "Ready to Build Your Product?" : "Turn Your Idea Into Reality"}
             </p>
           </div>
         </div>
@@ -56,7 +55,7 @@ export function StickyMobileCTA({ onBookClick }: { onBookClick: () => void }) {
             onClick={onBookClick}
             className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 sm:py-2.5 sm:px-5 rounded-xl sm:rounded-full uppercase tracking-wide flex items-center space-x-1.5 shadow-[0_0_20px_rgba(223,118,38,0.4)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
-            <span>Book Strategy Call</span>
+            <span>{isUS ? "Start Assessment" : "Check Project Fit"}</span>
             <i className="fa-solid fa-arrow-right text-[11px]"></i>
           </button>
         </div>
