@@ -1024,25 +1024,24 @@ router.post("/sync-lead", async (req, res) => {
       return res.status(400).json({ success: false, error: "leadData is required" });
     }
 
-    // Automatically dispatch Node.js Server Meta Conversions API (CAPI) events
+    // Automatically dispatch Node.js Server Meta Conversions API (CAPI) events (Schedule only)
     if (leadData.fullName && (leadData.phone || leadData.email)) {
       const isMeetingBooked = leadData.status === "completed" || leadData.pipelineStage === "meeting_booked" || !!leadData.meeting?.meetingTime;
-      const eventName = isMeetingBooked ? "Schedule" : "Lead";
-      const targetUrl = isMeetingBooked ? "https://firstoptionagency.in/success" : "https://firstoptionagency.in/survey";
-
-      sendMetaCapiEvent({
-        eventName,
-        eventSourceUrl: targetUrl,
-        email: leadData.email || "",
-        phone: leadData.phone || "",
-        fullName: leadData.fullName || "",
-        customData: {
-          content_name: isMeetingBooked ? "Growth Meeting Slot Booked" : "Growth Consultation Lead Form",
-          meeting_date: leadData.meeting?.meetingDate || undefined,
-          meeting_time: leadData.meeting?.meetingTime || undefined,
-        },
-        testEventCode: testEventCode || undefined,
-      }).catch((err) => console.error("Async Server Meta CAPI Sync Error:", err));
+      if (isMeetingBooked) {
+        sendMetaCapiEvent({
+          eventName: "Schedule",
+          eventSourceUrl: "https://firstoptionagency.in/success",
+          email: leadData.email || "",
+          phone: leadData.phone || "",
+          fullName: leadData.fullName || "",
+          customData: {
+            content_name: "Growth Meeting Slot Booked",
+            meeting_date: leadData.meeting?.meetingDate || undefined,
+            meeting_time: leadData.meeting?.meetingTime || undefined,
+          },
+          testEventCode: testEventCode || undefined,
+        }).catch((err) => console.error("Async Server Meta CAPI Sync Error:", err));
+      }
     }
 
     const result = await syncLeadAutomations(leadData, previousStage, previousMeetingTime);

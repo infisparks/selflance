@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { event as fbEvent, customEvent as fbCustomEvent, getPreservedQueryString } from "@/lib/fpixel";
+import { customEvent as fbCustomEvent, getPreservedQueryString } from "@/lib/fpixel";
 import { SelflanceHeader } from "@/components/selflance/SelflanceHeader";
 import { SelflanceHero } from "@/components/selflance/SelflanceHero";
 import { GrowthBottleneckSection } from "@/components/selflance/GrowthBottleneckSection";
@@ -142,11 +142,6 @@ export default function Home({
       window.history.replaceState({}, "", window.location.pathname + preserved);
     }
 
-    fbEvent("Lead", {
-      content_name: "CTA Button Click",
-      currency: isUS ? "USD" : "INR",
-      value: 0,
-    });
     fbCustomEvent("ButtonClick", {
       button_name: "Book Strategy Session CTA",
     });
@@ -158,7 +153,7 @@ export default function Home({
       createdDate: null,
       campaignName: null,
     });
-  }, [isUS]);
+  }, []);
 
   const handleCloseBooking = useCallback(() => {
     setBookingConfig({

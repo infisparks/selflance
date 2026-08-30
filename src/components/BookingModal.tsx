@@ -450,11 +450,6 @@ export function BookingModal({
 
       setModalStage(3);
 
-      fbEvent("Lead", {
-        content_name: activeCampaign.title || "Project Assessment Lead Form",
-        currency: contactInfo.countryCode === "+1" ? "USD" : "INR",
-        value: 0,
-      });
       fbCustomEvent("FormSubmit", {
         form_name: "Project Assessment Form",
         campaign: activeCampaign.id,
