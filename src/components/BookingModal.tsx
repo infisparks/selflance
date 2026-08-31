@@ -76,8 +76,8 @@ export function BookingModal({
 }: BookingModalProps) {
   const activeCampaign = getCampaignConfig(campaignName);
 
-  // 1: Assessment Survey (Q1-Q6), 2: Contact Form (Step 7), 3: Calendar, 4: Success
-  const [modalStage, setModalStage] = useState<1 | 2 | 3 | 4>(1);
+  // 1: Contact Form (Name, Email, Phone), 2: Assessment Questionnaire, 3: Calendar, 4: Success
+  const [modalStage, setModalStage] = useState<1 | 2 | 3 | 4>(initialStep || 1);
   const [isReselectingSlot, setIsReselectingSlot] = useState<boolean>(false);
   const [showAlreadySubmittedPopup, setShowAlreadySubmittedPopup] = useState<boolean>(false);
   const [firebaseLeadId, setFirebaseLeadId] = useState<string | null>(initialLeadId);
@@ -85,7 +85,6 @@ export function BookingModal({
 
   const [contactInfo, setContactInfo] = useState({
     fullName: "",
-    businessName: "",
     email: "",
     phone: "",
     countryCode: "+91",
@@ -94,6 +93,7 @@ export function BookingModal({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isSubmittingContact, setIsSubmittingContact] = useState<boolean>(false);
+  const [isSubmittingSurvey, setIsSubmittingSurvey] = useState<boolean>(false);
   const [hasRestoredLead, setHasRestoredLead] = useState<boolean>(false);
   const [qAnswers, setQAnswers] = useState<Record<string, string | string[]>>({});
   const [activeQIndex, setActiveQIndex] = useState<number>(0);
@@ -111,7 +111,7 @@ export function BookingModal({
   const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, boolean>>({});
   const [generatedMeetUrl, setGeneratedMeetUrl] = useState<string | null>(null);
 
-  // Detect Country & initialize
+  // Detect Country & initialize stage
   useEffect(() => {
     if (isOpen) {
       if (typeof window !== "undefined") {
@@ -124,11 +124,7 @@ export function BookingModal({
         }
       }
 
-      if (initialStep === 3) setModalStage(3);
-      else if (initialStep === 4) setModalStage(4);
-      else if (initialStep === 2) setModalStage(2);
-      else setModalStage(1);
-
+      if (initialStep) setModalStage(initialStep);
       if (initialLeadId) setFirebaseLeadId(initialLeadId);
       if (initialCreatedDate) setCreatedDate(initialCreatedDate);
     } else {
@@ -149,9 +145,9 @@ export function BookingModal({
       return;
     }
 
-    let targetPath = "/survey";
-    if (modalStage === 1) targetPath = "/survey";
-    else if (modalStage === 2) targetPath = "/form";
+    let targetPath = "/form";
+    if (modalStage === 1) targetPath = "/form";
+    else if (modalStage === 2) targetPath = "/survey";
     else if (modalStage === 3) targetPath = "/meeting";
     else if (modalStage === 4) targetPath = "/success";
 
@@ -185,7 +181,6 @@ export function BookingModal({
           if (fbLead.fullName && fbLead.phone) {
             setContactInfo({
               fullName: fbLead.fullName || "",
-              businessName: (fbLead as any).businessName || "",
               email: fbLead.email || "",
               phone: fbLead.phone || "",
               countryCode: fbLead.countryCode || "+91",
@@ -224,7 +219,6 @@ export function BookingModal({
             if (parsed.fullName && parsed.phone) {
               setContactInfo({
                 fullName: parsed.fullName || "",
-                businessName: parsed.businessName || "",
                 email: parsed.email || "",
                 phone: parsed.phone || "",
                 countryCode: parsed.countryCode || "+91",
@@ -340,35 +334,7 @@ export function BookingModal({
 
   const qualificationQuestions = activeCampaign.questions;
 
-  const handleOptionSelect = (field: string, label: string) => {
-    setQAnswers((prev) => ({ ...prev, [field]: label }));
-    if (activeQIndex < qualificationQuestions.length - 1) {
-      setActiveQIndex(activeQIndex + 1);
-    } else {
-      // Finished all 6 survey questions -> go to Step 7 Contact form
-      setModalStage(2);
-    }
-  };
-
-  const handleMultiSelectToggle = (field: string, label: string) => {
-    const current = (qAnswers[field] as string[]) || [];
-    let updated: string[];
-    if (current.includes(label)) {
-      updated = current.filter((item) => item !== label);
-    } else {
-      updated = [...current, label];
-    }
-    setQAnswers((prev) => ({ ...prev, [field]: updated }));
-  };
-
-  const handleNextQuestion = () => {
-    if (activeQIndex < qualificationQuestions.length - 1) {
-      setActiveQIndex(activeQIndex + 1);
-    } else {
-      setModalStage(2);
-    }
-  };
-
+  // Step 1 Submission: Contact Details (Name, Phone, Email)
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError(null);
@@ -376,6 +342,10 @@ export function BookingModal({
 
     const cleanPhone = contactInfo.phone.replace(/\D/g, "");
     let hasInputError = false;
+
+    if (!contactInfo.fullName.trim()) {
+      hasInputError = true;
+    }
 
     if (!contactInfo.email || !contactInfo.email.includes("@")) {
       setEmailError("Please enter a valid email address");
@@ -420,8 +390,7 @@ export function BookingModal({
       try {
         localStorage.setItem("firstoption_user_contact", JSON.stringify(contactInfo));
         localStorage.setItem("firstoption_lead_id", emailPrefixId);
-        localStorage.setItem("firstoption_survey_answers", JSON.stringify(qAnswers));
-        localStorage.setItem("firstoption_lead_status", "survey_completed");
+        localStorage.setItem("firstoption_lead_status", "partial");
       } catch (err) {
         console.error("LocalStorage save error:", err);
       }
@@ -431,16 +400,18 @@ export function BookingModal({
         email: contactInfo.email,
         phone: cleanPhone,
         countryCode: contactInfo.countryCode,
-        status: "survey_completed",
-        pipelineStage: "survey_completed",
+        status: "partial",
+        pipelineStage: "in_progress",
         stageMovedAt: new Date().toISOString(),
-        survey: qAnswers,
       };
 
       const res = await saveOrUpdateLead(leadPayload, emailPrefixId, createdDate, activeCampaign.id);
       if (res) {
         setFirebaseLeadId(res.leadId);
         setCreatedDate(res.createdDate);
+        if (res.leadData?.survey) {
+          setQAnswers(res.leadData.survey as Record<string, string | string[]>);
+        }
         try {
           localStorage.setItem("firstoption_created_date", res.createdDate);
         } catch (err) {
@@ -448,15 +419,16 @@ export function BookingModal({
         }
       }
 
-      setModalStage(3);
+      // Transition to Step 2: Assessment Questionnaire Popup
+      setModalStage(2);
 
       fbEvent("Lead", {
-        content_name: activeCampaign.title || "Project Assessment Lead Form",
+        content_name: activeCampaign.title || "Growth Consultation Lead Form",
         currency: contactInfo.countryCode === "+1" ? "USD" : "INR",
         value: 0,
       });
       fbCustomEvent("FormSubmit", {
-        form_name: "Project Assessment Form",
+        form_name: "Step 1 Contact Form",
         campaign: activeCampaign.id,
       });
 
@@ -474,6 +446,89 @@ export function BookingModal({
       console.error("Submit Contact Error:", err);
     } finally {
       setIsSubmittingContact(false);
+    }
+  };
+
+  // Step 2 Handlers: Question Answers
+  const handleOptionSelect = (field: string, label: string) => {
+    setQAnswers((prev) => ({ ...prev, [field]: label }));
+    if (activeQIndex < qualificationQuestions.length - 1) {
+      setActiveQIndex(activeQIndex + 1);
+    }
+  };
+
+  const handleMultiSelectToggle = (field: string, label: string) => {
+    const current = (qAnswers[field] as string[]) || [];
+    let updated: string[];
+    if (current.includes(label)) {
+      updated = current.filter((item) => item !== label);
+    } else {
+      updated = [...current, label];
+    }
+    setQAnswers((prev) => ({ ...prev, [field]: updated }));
+  };
+
+  const handleSurveySubmit = async () => {
+    setIsSubmittingSurvey(true);
+    const emailPrefixId = firebaseLeadId || sanitizeEmailToId(contactInfo.email);
+
+    try {
+      localStorage.setItem("firstoption_survey_answers", JSON.stringify(qAnswers));
+      localStorage.setItem("firstoption_lead_status", "survey_completed");
+    } catch (e) {
+      console.error("LocalStorage survey save error:", e);
+    }
+
+    try {
+      const surveyPayload: LeadData = {
+        fullName: contactInfo.fullName,
+        email: contactInfo.email,
+        phone: contactInfo.phone.replace(/\D/g, ""),
+        countryCode: contactInfo.countryCode,
+        status: "survey_completed",
+        pipelineStage: "survey_completed",
+        stageMovedAt: new Date().toISOString(),
+        survey: qAnswers,
+      };
+
+      await saveOrUpdateLead(surveyPayload, emailPrefixId, createdDate, activeCampaign.id);
+
+      setModalStage(3);
+
+      fbEvent("CompleteRegistration", {
+        content_name: activeCampaign.title || "Project Assessment Completed",
+        campaign: activeCampaign.id,
+      });
+      fbCustomEvent("SurveyComplete", {
+        form_name: "Project Assessment Questionnaire",
+        campaign: activeCampaign.id,
+      });
+
+      const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
+      const cleanPhone = contactInfo.phone.replace(/\D/g, "");
+      const fullPhoneNumber = `${contactInfo.countryCode}${cleanPhone}`;
+
+      fetch(`${serverUrl}/api/whatsapp/auto-send-survey`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: contactInfo.fullName,
+          email: contactInfo.email,
+          phone: fullPhoneNumber,
+        }),
+      }).catch((err) => console.error("Async WhatsApp Survey Confirmation Error:", err));
+    } catch (err) {
+      console.error("Submit Survey Error:", err);
+    } finally {
+      setIsSubmittingSurvey(false);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (activeQIndex < qualificationQuestions.length - 1) {
+      setActiveQIndex(activeQIndex + 1);
+    } else {
+      handleSurveySubmit();
     }
   };
 
@@ -614,7 +669,7 @@ export function BookingModal({
           </h3>
 
           <p className="text-xs sm:text-sm text-gray-300 font-medium leading-relaxed mt-2 max-w-sm mx-auto">
-            We already have your assessment &amp; contact details on file. For any query, assistance, or urgent strategy updates, contact us directly:
+            We already have your details on file. For any query, assistance, or urgent strategy updates, contact us directly:
           </p>
 
           {contactInfo.fullName && (
@@ -672,25 +727,171 @@ export function BookingModal({
                 className="bg-[#131C35] hover:bg-[#1A233D] text-gray-300 font-bold py-2.5 px-3 rounded-xl text-xs transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
               >
                 <i className="fa-solid fa-pen-to-square text-xs"></i>
-                <span>Retake Assessment</span>
+                <span>Fill New Details</span>
               </button>
             </div>
           </div>
         </div>
       ) : (
         <>
-          {/* STEP 1: Assessment Survey (Q1 through Q6) */}
+          {/* STEP 1: Contact Information (Name, Phone, Email only) */}
           {modalStage === 1 && (
+            <div className="bg-gradient-to-b from-[#141A2D] via-[#0F1629] to-[#0B1121] text-white border border-[#6366F1]/40 w-full max-w-md sm:max-w-lg rounded-3xl p-4 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative max-h-[92vh] overflow-y-auto font-sans my-auto">
+              <div className="flex items-center justify-between border-b border-[#2A3552] pb-3 mb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="bg-[#6366F1]/20 border border-[#6366F1]/40 text-[#818CF8] text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                    Step 1 of 3
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    Fast 30-Sec Booking
+                  </span>
+                </div>
+                <button
+                  onClick={handleReset}
+                  className="w-7 h-7 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm transition-colors cursor-pointer"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <form onSubmit={handleContactSubmit} className="space-y-3.5 text-left">
+                <div className="text-center space-y-1">
+                  <h3 className="text-base sm:text-xl font-black text-white leading-snug">
+                    Claim Your 1-on-1 Strategy Session
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
+                    Enter your details to start your project assessment and unlock the strategy calendar.
+                  </p>
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 mb-1">
+                    Your Name <span className="text-[#df7626]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    autoComplete="name"
+                    placeholder="Enter your full name"
+                    value={contactInfo.fullName}
+                    onChange={(e) => {
+                      const capitalized = e.target.value.replace(/(^|\s)\S/g, (letter) => letter.toUpperCase());
+                      setContactInfo({ ...contactInfo, fullName: capitalized });
+                    }}
+                    className="w-full bg-[#0B1121] border border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626] rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Phone Number with Country Code Dropdown */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 mb-1">
+                    WhatsApp / Phone Number <span className="text-[#df7626]">*</span>
+                  </label>
+                  <div className={`flex items-center bg-[#0B1121] border ${
+                    phoneError ? "border-red-500" : "border-[#2A3552] focus-within:border-[#df7626] focus-within:ring-1 focus-within:ring-[#df7626]"
+                  } rounded-xl overflow-hidden shadow-inner`}>
+                    <select
+                      value={contactInfo.countryCode}
+                      onChange={(e) => setContactInfo({ ...contactInfo, countryCode: e.target.value })}
+                      className="bg-[#0D1426] text-white text-xs sm:text-sm font-bold border-r border-[#2A3552] px-2.5 py-2.5 sm:py-3 outline-none cursor-pointer focus:bg-[#131C35]"
+                    >
+                      <option value="+91">🇮🇳 +91 (IN)</option>
+                      <option value="+1">🇺🇸 +1 (US)</option>
+                    </select>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel-national"
+                      pattern="[0-9]*"
+                      maxLength={10}
+                      required
+                      placeholder={contactInfo.countryCode === "+1" ? "2125550199" : "9876543210"}
+                      value={contactInfo.phone}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/\D/g, "");
+                        setContactInfo({ ...contactInfo, phone: onlyNums });
+                        if (phoneError) setPhoneError(null);
+                      }}
+                      onBlur={handlePhoneBlur}
+                      className="w-full px-3 py-2.5 sm:py-3 text-sm text-white bg-transparent placeholder-gray-500 focus:outline-none font-mono tracking-wider"
+                    />
+                  </div>
+                  {phoneError && (
+                    <p className="text-red-400 font-bold text-xs mt-1 animate-pulse flex items-center space-x-1">
+                      <span>⚠️</span>
+                      <span>{phoneError}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Email Address */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 mb-1">
+                    Email Address <span className="text-[#df7626]">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder="name@company.com"
+                    value={contactInfo.email}
+                    onChange={(e) => {
+                      setContactInfo({ ...contactInfo, email: e.target.value });
+                      if (emailError) setEmailError(null);
+                    }}
+                    onBlur={handleEmailBlur}
+                    className={`w-full bg-[#0B1121] border ${
+                      emailError ? "border-red-500" : "border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626]"
+                    } rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors`}
+                  />
+                  {emailError && (
+                    <p className="text-red-400 font-bold text-xs mt-1 animate-pulse flex items-center space-x-1">
+                      <span>⚠️</span>
+                      <span>{emailError}</span>
+                    </p>
+                  )}
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmittingContact}
+                    className="w-full bg-gradient-to-r from-[#df7626] via-[#ea580c] to-[#d97706] hover:from-[#ea580c] hover:to-[#df7626] text-white py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base flex flex-col items-center justify-center space-y-0.5 shadow-[0_8px_25px_-5px_rgba(223,118,38,0.5)] border-t border-white/20 border-b-4 border-[#9a3412] active:border-b-0 active:translate-y-0.5 overflow-hidden transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <div className="text-sm sm:text-base font-black text-white flex items-center justify-center space-x-2 uppercase tracking-wide">
+                      {isSubmittingContact ? (
+                        <>
+                          <i className="fa-solid fa-circle-notch fa-spin text-sm"></i>
+                          <span>VERIFYING DETAILS...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Continue to Assessment →</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="text-[10px] sm:text-xs font-extrabold text-amber-200">
+                      ⚡ 100% Free Strategy Session • No Sales Pitch
+                    </div>
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* STEP 2: Assessment Questionnaire Popup */}
+          {modalStage === 2 && (
             <div className="bg-[#0F1629] text-white border border-[#2A3552] w-full max-w-xl rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl relative max-h-[92vh] overflow-y-auto font-sans flex flex-col justify-between my-auto">
               <div>
                 {/* Header Badge & Progress */}
                 <div className="flex items-center justify-between border-b border-[#2A3552] pb-3 mb-4">
                   <div className="flex items-center space-x-2">
                     <span className="bg-[#6366F1]/20 border border-[#6366F1]/40 text-[#818CF8] text-[10px] sm:text-xs font-black px-3 py-1 rounded-full">
-                      Step {activeQIndex + 1} of 7
+                      Step 2 • Q{activeQIndex + 1} of {qualificationQuestions.length}
                     </span>
                     <h3 className="text-xs sm:text-sm font-bold text-gray-300 tracking-wide truncate max-w-[200px] sm:max-w-xs">
-                      Project Assessment
+                      {activeCampaign.subtitle || "Project Assessment"}
                     </h3>
                   </div>
                   <button
@@ -725,7 +926,7 @@ export function BookingModal({
                         </h4>
                       </div>
 
-                      {/* Textarea question (e.g., Step 6) */}
+                      {/* Textarea question */}
                       {isTextarea ? (
                         <div className="space-y-3">
                           <textarea
@@ -737,7 +938,7 @@ export function BookingModal({
                           />
                         </div>
                       ) : isMulti ? (
-                        /* Multi-select checkboxes (e.g., Step 3) */
+                        /* Multi-select checkboxes */
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto pr-1">
                           {optionsList.map((opt) => {
                             const currentArr = (qAnswers[currentQ.field] as string[]) || [];
@@ -796,13 +997,31 @@ export function BookingModal({
               {/* Bottom Nav Controls */}
               <div className="pt-4 border-t border-[#2A3552] flex items-center justify-between mt-6">
                 <div className="flex items-center space-x-3">
-                  <button
-                    type="button"
-                    onClick={handleNextQuestion}
-                    className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#df7626] text-white font-extrabold px-5 py-2.5 rounded-full text-xs sm:text-sm uppercase tracking-wide flex items-center space-x-2 shadow-lg cursor-pointer transition-transform active:scale-95"
-                  >
-                    <span>{activeQIndex === qualificationQuestions.length - 1 ? "Next: Contact Details →" : "Next →"}</span>
-                  </button>
+                  {activeQIndex === qualificationQuestions.length - 1 ? (
+                    <button
+                      type="button"
+                      disabled={isSubmittingSurvey}
+                      onClick={handleSurveySubmit}
+                      className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#df7626] text-white font-extrabold px-5 py-2.5 rounded-full text-xs sm:text-sm uppercase tracking-wide flex items-center space-x-2 shadow-lg cursor-pointer transition-transform active:scale-95 disabled:opacity-50"
+                    >
+                      {isSubmittingSurvey ? (
+                        <>
+                          <i className="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                          <span>SAVING...</span>
+                        </>
+                      ) : (
+                        <span>Continue to Calendar →</span>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleNextQuestion}
+                      className="bg-gradient-to-r from-[#df7626] to-[#ea580c] hover:from-[#ea580c] hover:to-[#df7626] text-white font-extrabold px-5 py-2.5 rounded-full text-xs sm:text-sm uppercase tracking-wide flex items-center space-x-2 shadow-lg cursor-pointer transition-transform active:scale-95"
+                    >
+                      <span>Next →</span>
+                    </button>
+                  )}
                   <span className="text-[11px] text-gray-400 font-mono hidden sm:inline">
                     press <span className="text-white font-bold">Enter ↵</span>
                   </span>
@@ -828,172 +1047,6 @@ export function BookingModal({
                   </button>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* STEP 2 (Funnel Step 7): Contact Information */}
-          {modalStage === 2 && (
-            <div className="bg-gradient-to-b from-[#141A2D] via-[#0F1629] to-[#0B1121] text-white border border-[#6366F1]/40 w-full max-w-md sm:max-w-lg rounded-3xl p-4 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative max-h-[92vh] overflow-y-auto font-sans my-auto">
-              <div className="flex items-center justify-between border-b border-[#2A3552] pb-3 mb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="bg-[#6366F1]/20 border border-[#6366F1]/40 text-[#818CF8] text-[10px] font-black px-2.5 py-0.5 rounded-full">
-                    Step 7 of 7
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">
-                    Final Step
-                  </span>
-                </div>
-                <button
-                  onClick={handleReset}
-                  className="w-7 h-7 rounded-full text-gray-400 hover:text-white hover:bg-[#1E293B] flex items-center justify-center text-sm transition-colors cursor-pointer"
-                >
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
-              </div>
-
-              <form onSubmit={handleContactSubmit} className="space-y-3.5 text-left">
-                <div className="text-center space-y-1">
-                  <h3 className="text-base sm:text-xl font-black text-white leading-snug">
-                    Where Should We Send Your Next Step?
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
-                    Enter your contact details to review your customized roadmap and unlock the strategy calendar.
-                  </p>
-                </div>
-
-                {/* Full Name */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    Your Name <span className="text-[#df7626]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    autoComplete="name"
-                    placeholder="Enter your name"
-                    value={contactInfo.fullName}
-                    onChange={(e) => {
-                      const capitalized = e.target.value.replace(/(^|\s)\S/g, (letter) => letter.toUpperCase());
-                      setContactInfo({ ...contactInfo, fullName: capitalized });
-                    }}
-                    className="w-full bg-[#0B1121] border border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626] rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Business Name */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    Business / Company Name
-                  </label>
-                  <input
-                    type="text"
-                    autoComplete="organization"
-                    placeholder="Company or Brand Name (Optional)"
-                    value={contactInfo.businessName}
-                    onChange={(e) => setContactInfo({ ...contactInfo, businessName: e.target.value })}
-                    className="w-full bg-[#0B1121] border border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626] rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    Email Address <span className="text-[#df7626]">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    autoComplete="email"
-                    placeholder="name@company.com"
-                    value={contactInfo.email}
-                    onChange={(e) => {
-                      setContactInfo({ ...contactInfo, email: e.target.value });
-                      if (emailError) setEmailError(null);
-                    }}
-                    onBlur={handleEmailBlur}
-                    className={`w-full bg-[#0B1121] border ${
-                      emailError ? "border-red-500" : "border-[#2A3552] focus:border-[#df7626] focus:ring-1 focus:ring-[#df7626]"
-                    } rounded-xl px-3.5 py-2.5 sm:py-3 text-sm text-white placeholder-gray-500 shadow-inner outline-none transition-colors`}
-                  />
-                  {emailError && (
-                    <p className="text-red-400 font-bold text-xs mt-1 animate-pulse flex items-center space-x-1">
-                      <span>⚠️</span>
-                      <span>{emailError}</span>
-                    </p>
-                  )}
-                </div>
-
-                {/* Phone Number with Country Code Dropdown */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">
-                    WhatsApp / Phone <span className="text-[#df7626]">*</span>
-                  </label>
-                  <div className={`flex items-center bg-[#0B1121] border ${
-                    phoneError ? "border-red-500" : "border-[#2A3552] focus-within:border-[#df7626] focus-within:ring-1 focus-within:ring-[#df7626]"
-                  } rounded-xl overflow-hidden shadow-inner`}>
-                    <select
-                      value={contactInfo.countryCode}
-                      onChange={(e) => setContactInfo({ ...contactInfo, countryCode: e.target.value })}
-                      className="bg-[#0D1426] text-white text-xs sm:text-sm font-bold border-r border-[#2A3552] px-2.5 py-2.5 sm:py-3 outline-none cursor-pointer focus:bg-[#131C35]"
-                    >
-                      <option value="+91">🇮🇳 +91 (IN)</option>
-                      <option value="+1">🇺🇸 +1 (US)</option>
-                    </select>
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      autoComplete="tel-national"
-                      pattern="[0-9]*"
-                      maxLength={10}
-                      required
-                      placeholder={contactInfo.countryCode === "+1" ? "2125550199" : "9876543210"}
-                      value={contactInfo.phone}
-                      onChange={(e) => {
-                        const onlyNums = e.target.value.replace(/\D/g, "");
-                        setContactInfo({ ...contactInfo, phone: onlyNums });
-                        if (phoneError) setPhoneError(null);
-                      }}
-                      onBlur={handlePhoneBlur}
-                      className="w-full px-3 py-2.5 sm:py-3 text-sm text-white bg-transparent placeholder-gray-500 focus:outline-none font-mono tracking-wider"
-                    />
-                  </div>
-                  {phoneError && (
-                    <p className="text-red-400 font-bold text-xs mt-1 animate-pulse flex items-center space-x-1">
-                      <span>⚠️</span>
-                      <span>{phoneError}</span>
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setModalStage(1)}
-                    className="bg-[#131C35] hover:bg-[#1A233D] text-gray-300 font-bold py-3 px-4 rounded-xl text-xs transition-colors cursor-pointer"
-                  >
-                    ← Back
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmittingContact}
-                    className="flex-1 bg-gradient-to-r from-[#df7626] via-[#ea580c] to-[#d97706] hover:from-[#ea580c] hover:to-[#df7626] text-white py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base flex flex-col items-center justify-center space-y-0.5 shadow-[0_8px_25px_-5px_rgba(223,118,38,0.5)] border-t border-white/20 border-b-4 border-[#9a3412] active:border-b-0 active:translate-y-0.5 overflow-hidden transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <div className="text-sm sm:text-base font-black text-white flex items-center justify-center space-x-2 uppercase tracking-wide">
-                      {isSubmittingContact ? (
-                        <>
-                          <i className="fa-solid fa-circle-notch fa-spin text-sm"></i>
-                          <span>GENERATING NEXT STEPS...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>See My Next Steps →</span>
-                        </>
-                      )}
-                    </div>
-                  </button>
-                </div>
-              </form>
             </div>
           )}
 
@@ -1225,8 +1278,8 @@ export function BookingModal({
 
               <div className="bg-[#0B1121] border border-[#2A3552] rounded-2xl p-3.5 text-left text-xs text-gray-300 space-y-1 font-mono">
                 <div><span className="text-gray-500">Name:</span> {contactInfo.fullName || "User"}</div>
-                {contactInfo.businessName && <div><span className="text-gray-500">Business:</span> {contactInfo.businessName}</div>}
                 <div><span className="text-gray-500">Phone:</span> {contactInfo.countryCode} {contactInfo.phone || "N/A"}</div>
+                {contactInfo.email && <div><span className="text-gray-500">Email:</span> {contactInfo.email}</div>}
                 <div><span className="text-gray-500">Booked Slot:</span> {formattedBookingDate} ({selectedTimeSlot})</div>
                 {generatedMeetUrl && (
                   <div className="pt-1.5 border-t border-[#2A3552] text-indigo-300">
