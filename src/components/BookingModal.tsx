@@ -11,7 +11,7 @@ import {
   LeadData,
 } from "@/lib/firebase";
 import { getCampaignConfig, DEFAULT_CAMPAIGN_ID } from "@/config/campaigns";
-import { event as fbEvent, customEvent as fbCustomEvent, getPreservedQueryString } from "@/lib/fpixel";
+import { getPreservedQueryString } from "@/lib/fpixel";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -422,16 +422,6 @@ export function BookingModal({
       // Transition to Step 2: Assessment Questionnaire Popup
       setModalStage(2);
 
-      fbEvent("Lead", {
-        content_name: activeCampaign.title || "Growth Consultation Lead Form",
-        currency: contactInfo.countryCode === "+1" ? "USD" : "INR",
-        value: 0,
-      });
-      fbCustomEvent("FormSubmit", {
-        form_name: "Step 1 Contact Form",
-        campaign: activeCampaign.id,
-      });
-
       const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
       fetch(`${serverUrl}/api/whatsapp/auto-send-welcome`, {
         method: "POST",
@@ -494,15 +484,6 @@ export function BookingModal({
       await saveOrUpdateLead(surveyPayload, emailPrefixId, createdDate, activeCampaign.id);
 
       setModalStage(3);
-
-      fbEvent("CompleteRegistration", {
-        content_name: activeCampaign.title || "Project Assessment Completed",
-        campaign: activeCampaign.id,
-      });
-      fbCustomEvent("SurveyComplete", {
-        form_name: "Project Assessment Questionnaire",
-        campaign: activeCampaign.id,
-      });
 
       const serverUrl = (process.env.NEXT_PUBLIC_WHATSAPP_SERVER_URL || "https://self.infiplus.in").replace(/\/$/, "");
       const cleanPhone = contactInfo.phone.replace(/\D/g, "");
@@ -590,11 +571,6 @@ export function BookingModal({
     }
 
     setModalStage(4);
-
-    fbEvent("Schedule", {
-      content_name: `Strategy Session - ${appointmentDateStr} ${timeSlot}`,
-      campaign: activeCampaign.id,
-    });
 
     const meetingPayload: LeadData = {
       fullName: contactInfo.fullName,
